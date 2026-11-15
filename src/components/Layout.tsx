@@ -6,9 +6,9 @@ import { supabase } from '../lib/supabase'
 const nav = [
   { label: 'POS', to: '/pos' },
   { label: 'Transactions' },
-  { label: 'Menu' },
-  { label: 'Inventory' },
-  { label: 'Reports', to: '/admin' },
+  { label: 'Menu', to: '/admin/menu', adminOnly: true },
+  { label: 'Inventory', to: '/admin/inventory', adminOnly: true },
+  { label: 'Reports', to: '/admin', adminOnly: true },
 ]
 
 const base = 'block w-full rounded-2xl px-4 py-3.5 text-left font-semibold'
@@ -17,6 +17,7 @@ const off = 'text-[#c9ccd6] hover:bg-white/10'
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { session, role } = useAuth()
+  const links = nav.filter((n) => !n.adminOnly || role === 'admin')
 
   return (
     <div className="flex h-screen bg-page">
@@ -28,11 +29,12 @@ export default function Layout({ children }: { children: ReactNode }) {
           KaPOS
         </div>
 
-        {nav.map(({ label, to }) =>
+        {links.map(({ label, to }) =>
           to ? (
             <NavLink
               key={label}
               to={to}
+              end
               className={({ isActive }) => `${base} ${isActive ? on : off}`}
             >
               {label}
