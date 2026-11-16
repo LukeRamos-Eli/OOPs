@@ -9,9 +9,24 @@ export type MenuItem = {
   is_available: boolean
 }
 
+// A menu item as the POS sees it: with its category and what the stock allows
+export type PosItem = MenuItem & {
+  category: string | null
+  max_servings: number | null // null = no recipe, so no stock limit
+  can_order: boolean
+}
+
+export type Ingredient = {
+  id: number
+  name: string
+  unit: string
+  stock_qty: number
+  min_stock: number
+}
+
 export type OrderType = 'dine_in' | 'takeout'
 
-export type CartLine = { item: MenuItem; qty: number }
+export type CartLine = { item: PosItem; qty: number }
 
 export type ReceiptData = {
   orderId: number
