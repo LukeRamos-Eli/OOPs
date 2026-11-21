@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase'
 
 const nav = [
   { label: 'POS', to: '/pos' },
-  { label: 'Transactions' },
+  { label: 'Transactions', to: '/transactions' },
   { label: 'Menu', to: '/admin/menu', adminOnly: true },
   { label: 'Inventory', to: '/admin/inventory', adminOnly: true },
   { label: 'Dashboard', to: '/admin', adminOnly: true },
