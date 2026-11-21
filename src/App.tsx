@@ -8,6 +8,7 @@ import Dashboard from './pages/admin/Dashboard'
 import MenuManagement from './pages/admin/MenuManagement'
 import Inventory from './pages/admin/Inventory'
 import Reports from './pages/admin/Reports'
+import Users from './pages/admin/Users'
 
 function Home() {
   const { session, role, loading } = useAuth()
@@ -39,6 +40,7 @@ export default function App() {
             <Route path="/admin/menu" element={<MenuManagement />} />
             <Route path="/admin/inventory" element={<Inventory />} />
             <Route path="/admin/reports" element={<Reports />} />
+            <Route path="/admin/users" element={<Users />} />
           </Route>
         </Routes>
       </BrowserRouter>

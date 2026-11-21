@@ -10,6 +10,7 @@ const nav = [
   { label: 'Inventory', to: '/admin/inventory', adminOnly: true },
   { label: 'Dashboard', to: '/admin', adminOnly: true },
   { label: 'Reports', to: '/admin/reports', adminOnly: true },
+  { label: 'Users', to: '/admin/users', adminOnly: true },
 ]
 
 const base = 'block w-full rounded-2xl px-4 py-3.5 text-left font-semibold'
