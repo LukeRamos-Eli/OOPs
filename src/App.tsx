@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './lib/auth'
 import ProtectedRoute from './components/ProtectedRoute'
 import Login from './pages/Login'
 import Pos from './pages/Pos'
+import Transactions from './pages/Transactions'
 import Dashboard from './pages/admin/Dashboard'
 import MenuManagement from './pages/admin/MenuManagement'
 import Inventory from './pages/admin/Inventory'
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="/login" element={<LoginRoute />} />
           <Route element={<ProtectedRoute allow={['admin', 'cashier']} />}>
             <Route path="/pos" element={<Pos />} />
+            <Route path="/transactions" element={<Transactions />} />
           </Route>
           <Route element={<ProtectedRoute allow={['admin']} />}>
             <Route path="/admin" element={<Dashboard />} />
