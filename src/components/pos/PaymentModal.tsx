@@ -12,54 +12,83 @@ type Props = {
 export default function PaymentModal({ total, busy, error, onConfirm, onClose }: Props) {
   const [value, setValue] = useState('')
   const tendered = Number(value) || 0
-  const change = tendered - total
-  const quick = [100, 200, 500, 1000].filter((q) => q >= total)
+  const change = Math.round((tendered - total) * 100) / 100
+  const quick = [50, 100, 200, 500, 1000].filter((q) => q >= total)
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 space-y-4">
-        <h2 className="text-xl font-bold text-amber-900">Cash Payment</h2>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Cash payment"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4"
+    >
+      <div className="flex w-full max-w-sm flex-col gap-4 rounded-3xl bg-white p-6">
+        <h2 className="text-xl font-extrabold">Cash payment</h2>
 
-        <div className="flex justify-between text-lg">
-          <span>Total due</span>
-          <span className="font-bold">{peso(total)}</span>
+        <div className="flex items-center justify-between text-lg">
+          <span className="text-muted">Total due</span>
+          <b>{peso(total)}</b>
         </div>
 
         <input
           type="number"
-          inputMode="decimal"
           min="0"
+          inputMode="decimal"
+          autoFocus
           placeholder="Amount received"
+          aria-label="Amount received"
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          autoFocus
-          className="w-full border rounded-lg px-3 py-2 text-lg"
+          className="h-13 w-full rounded-xl bg-field px-4 text-lg outline-none placeholder:text-[#6b6e7c] focus:ring-2 focus:ring-brand"
         />
 
         <div className="flex flex-wrap gap-2">
-          <button onClick={() => setValue(String(total))} className="px-3 py-1 rounded bg-amber-100">Exact</button>
+          <button
+            type="button"
+            onClick={() => setValue(String(total))}
+            className="h-11 rounded-full bg-peach px-4 text-sm font-semibold text-[#b23b06]"
+          >
+            Exact
+          </button>
           {quick.map((q) => (
-            <button key={q} onClick={() => setValue(String(q))} className="px-3 py-1 rounded bg-amber-100">
+            <button
+              key={q}
+              type="button"
+              onClick={() => setValue(String(q))}
+              className="h-11 rounded-full bg-peach px-4 text-sm font-semibold text-[#b23b06]"
+            >
               {peso(q)}
             </button>
           ))}
         </div>
 
-        <div className="flex justify-between text-lg">
-          <span>Change</span>
-          <span className={`font-bold ${change < 0 ? 'text-red-600' : 'text-green-700'}`}>
+        <div className="flex items-center justify-between text-lg">
+          <span className="text-muted">Change</span>
+          <b className={change < 0 ? 'text-red-700' : 'text-[#17663a]'}>
             {change < 0 ? '—' : peso(change)}
-          </span>
+          </b>
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && (
+          <p role="alert" className="text-sm text-red-700">
+            {error}
+          </p>
+        )}
 
-        <div className="flex gap-2">
-          <button onClick={onClose} disabled={busy} className="flex-1 py-2 rounded-lg border">Cancel</button>
+        <div className="flex gap-3">
           <button
+            type="button"
+            onClick={onClose}
+            disabled={busy}
+            className="h-13 flex-1 rounded-xl border border-[#d9dee7] font-semibold"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
             onClick={() => onConfirm(tendered)}
             disabled={busy || tendered < total}
-            className="flex-1 py-2 rounded-lg bg-green-700 text-white font-semibold disabled:opacity-40"
+            className="h-13 flex-1 rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy disabled:opacity-40"
           >
             {busy ? 'Processing…' : 'Confirm'}
           </button>
