@@ -114,8 +114,8 @@ export default function Pos() {
                 key={c.id}
                 type="button"
                 onClick={() => setActive(c.id)}
-                className={`h-11 rounded-full border px-5 text-sm font-semibold ${
-                  active === c.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white'
+                className={`h-11 rounded-full border px-5 text-sm font-semibold transition-all active:scale-[0.95] ${
+                  active === c.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5] active:bg-[#e3e7ee]'
                 }`}
               >
                 {c.name}
@@ -136,8 +136,8 @@ export default function Pos() {
                 type="button"
                 disabled={!item.can_order}
                 onClick={() => warn(item, add(item))}
-                className={`${card} flex flex-col gap-2 p-4 text-left ${
-                  item.can_order ? 'hover:ring-2 hover:ring-brand' : 'opacity-60'
+                className={`${card} flex flex-col gap-2 p-4 text-left transition-all ${
+                  item.can_order ? 'hover:ring-2 hover:ring-brand hover:shadow-lg active:scale-[0.97] active:ring-brand-dark' : 'opacity-60'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -179,7 +179,7 @@ export default function Pos() {
                 clear()
                 setNotice('')
               }}
-              className="text-xs font-bold tracking-wider text-brand-dark"
+              className="text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]"
             >
               CLEAR
             </button>
@@ -191,8 +191,8 @@ export default function Pos() {
                 key={value}
                 type="button"
                 onClick={() => setOrderType(value)}
-                className={`h-11 flex-1 rounded-full border text-sm font-semibold ${
-                  orderType === value ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white'
+                className={`h-11 flex-1 rounded-full border text-sm font-semibold transition-all active:scale-[0.95] ${
+                  orderType === value ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5] active:bg-[#e3e7ee]'
                 }`}
               >
                 {label}
@@ -219,7 +219,7 @@ export default function Pos() {
                     type="button"
                     aria-label={`Decrease ${l.item.name}`}
                     onClick={() => setQty(l.item.id, l.qty - 1)}
-                    className="h-10 w-10 rounded-full bg-[#32343e]"
+                    className="h-10 w-10 rounded-full bg-[#32343e] transition-colors hover:bg-[#484a55] active:bg-[#25272e]"
                   >
                     −
                   </button>
@@ -228,7 +228,7 @@ export default function Pos() {
                     type="button"
                     aria-label={`Increase ${l.item.name}`}
                     onClick={() => warn(l.item, setQty(l.item.id, l.qty + 1))}
-                    className="h-10 w-10 rounded-full bg-[#32343e]"
+                    className="h-10 w-10 rounded-full bg-[#32343e] transition-colors hover:bg-[#484a55] active:bg-[#25272e]"
                   >
                     +
                   </button>
@@ -249,7 +249,7 @@ export default function Pos() {
                 setPayError('')
                 setShowPayment(true)
               }}
-              className="h-13 rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy disabled:opacity-40"
+              className="h-13 rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97] disabled:opacity-40"
             >
               Charge
             </button>

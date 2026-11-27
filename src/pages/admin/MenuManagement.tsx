@@ -210,7 +210,7 @@ export default function MenuManagement() {
                 reset()
                 document.getElementById('name')?.focus()
               }}
-              className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy"
+              className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97]"
             >
               + Add item
             </button>
@@ -222,8 +222,8 @@ export default function MenuManagement() {
                 key={c.id}
                 type="button"
                 onClick={() => setTab(c.id)}
-                className={`py-3 font-semibold ${
-                  tab === c.id ? 'border-b-[3px] border-brand text-navy' : 'text-muted'
+                className={`py-3 font-semibold transition-colors ${
+                  tab === c.id ? 'border-b-[3px] border-brand text-navy' : 'text-muted hover:text-navy'
                 }`}
               >
                 {c.name}
@@ -257,7 +257,7 @@ export default function MenuManagement() {
                   type="button"
                   onClick={() => toggleAvailable(row)}
                   aria-label={`Toggle availability of ${row.name}`}
-                  className={`rounded-xl px-3 py-1 text-xs font-bold ${
+                  className={`rounded-xl px-3 py-1 text-xs font-bold transition-colors hover:brightness-90 ${
                     row.is_available ? 'bg-[#e3f5ea] text-[#17663a]' : 'bg-[#e7eaf0] text-[#3f4350]'
                   }`}
                 >
@@ -267,14 +267,14 @@ export default function MenuManagement() {
                 <button
                   type="button"
                   onClick={() => startEdit(row)}
-                  className="text-xs font-bold tracking-wider text-brand-dark"
+                  className="text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]"
                 >
                   EDIT
                 </button>
                 <button
                   type="button"
                   onClick={() => remove(row)}
-                  className="text-xs font-bold tracking-wider text-red-700"
+                  className="text-xs font-bold tracking-wider text-red-700 transition-colors hover:text-red-900 active:text-red-950"
                 >
                   DELETE
                 </button>
@@ -291,7 +291,7 @@ export default function MenuManagement() {
             <button
               type="button"
               onClick={reset}
-              className="text-xs font-bold tracking-wider text-brand-dark"
+              className="text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]"
             >
               RESET
             </button>
@@ -354,13 +354,13 @@ export default function MenuManagement() {
                       type="button"
                       aria-pressed={selected}
                       onClick={() => toggleIngredient(ing.id)}
-                      className="flex w-16 flex-col items-center gap-1 text-[11px] text-muted"
+                      className="flex w-16 flex-col items-center gap-1 text-[11px] text-muted transition-transform active:scale-90"
                     >
                       <span
-                        className={`flex h-10 w-10 items-center justify-center rounded-full text-[13px] font-extrabold ${
+                        className={`flex h-10 w-10 items-center justify-center rounded-full text-[13px] font-extrabold transition-all ${
                           selected
                             ? 'border-2 border-brand bg-peach text-[#b23b06]'
-                            : 'border border-[#d9dee7] bg-white text-muted'
+                            : 'border border-[#d9dee7] bg-white text-muted hover:border-brand/50 hover:bg-peach/50'
                         }`}
                       >
                         {ing.name.slice(0, 2)}
@@ -428,7 +428,7 @@ export default function MenuManagement() {
             type="button"
             onClick={save}
             disabled={busy}
-            className="h-13 rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy disabled:opacity-60"
+            className="h-13 rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97] disabled:opacity-60"
           >
             {busy ? 'Saving…' : 'Save changes'}
           </button>

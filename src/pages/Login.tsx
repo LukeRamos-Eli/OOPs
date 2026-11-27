@@ -70,33 +70,29 @@ export default function Login() {
               Need an account? <span className="font-semibold text-[#ff8a4c]">Ask your manager.</span>
             </p>
 
-            <div className="mt-9 flex flex-col gap-[18px]">
-              <div className={fieldBox}>
-                <label htmlFor="email" className={fieldLabel}>
-                  Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  required
-                  autoComplete="email"
-                  placeholder="name@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={fieldInput}
-                />
-                <svg
-                  className="absolute right-5 top-1/2 -translate-y-1/2"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#c9ccd6"
-                  strokeWidth="2"
-                  aria-hidden="true"
-                >
-                  <rect x="3" y="5" width="18" height="14" rx="2" />
-                  <path d="M3 7l9 6 9-6" />
+          <div>
+            <label htmlFor="password" className={label}>Password</label>
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                required
+                autoComplete="current-password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`${field} pr-12`}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((s) => !s)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-xl transition-colors hover:bg-field active:bg-[#dce3ec]"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5e6270" strokeWidth="2" aria-hidden="true">
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+                  <circle cx="12" cy="12" r="3" />
+                  {showPassword && <path d="M3 3l18 18" />}
                 </svg>
               </div>
 
@@ -141,12 +137,22 @@ export default function Login() {
               <input type="checkbox" className="h-5 w-5 accent-brand" />
               Remember me
             </label>
+            <button type="button" className="text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]">
+              FORGOT PASSWORD
+            </button>
+          </div>
 
-            {error && (
-              <p role="alert" className="mt-4 text-sm text-red-300">
-                {error}
-              </p>
-            )}
+          {error && (
+            <p role="alert" className="text-sm text-red-700">{error}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={busy}
+            className="h-13 w-full rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97] disabled:opacity-60"
+          >
+            {busy ? 'Signing in…' : 'Log in'}
+          </button>
 
             <button
               type="submit"

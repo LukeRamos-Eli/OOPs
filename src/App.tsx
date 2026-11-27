@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './lib/auth'
 import ProtectedRoute from './components/ProtectedRoute'
+import LoadingScreen from './components/LoadingScreen'
 import Login from './pages/Login'
 import Pos from './pages/Pos'
 import Transactions from './pages/Transactions'
@@ -12,14 +13,14 @@ import Users from './pages/admin/Users'
 
 function Home() {
   const { session, role, loading } = useAuth()
-  if (loading) return <p className="p-6">Loading…</p>
+  if (loading) return <LoadingScreen />
   if (!session) return <Navigate to="/login" replace />
   return <Navigate to={role === 'admin' ? '/admin' : '/pos'} replace />
 }
 
 function LoginRoute() {
   const { session, loading } = useAuth()
-  if (loading) return <p className="p-6">Loading…</p>
+  if (loading) return <LoadingScreen />
   if (session) return <Navigate to="/" replace />
   return <Login />
 }
