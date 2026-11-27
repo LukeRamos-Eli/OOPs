@@ -3,6 +3,7 @@ import Layout from '../../components/Layout'
 import { supabase } from '../../lib/supabase'
 import { peso } from '../../lib/format'
 import type { Category } from '../../types/database'
+import { imageUrl, uploadMenuImage, deleteMenuImage } from '../../lib/images'
 
 type Row = {
   id: number
@@ -11,6 +12,7 @@ type Row = {
   price: number
   is_available: boolean
   category_id: number | null
+  image_path: string | null
   categories: { name: string } | null
 }
 type Ing = { id: number; name: string; unit: string }
@@ -34,12 +36,16 @@ export default function MenuManagement() {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [photo, setPhoto] = useState<File | null>(null)
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null)
+  const [currentPath, setCurrentPath] = useState<string | null>(null)
+  const [removePhoto, setRemovePhoto] = useState(false)
 
   const load = useCallback(async () => {
     const [m, c, i, a] = await Promise.all([
       supabase
         .from('menu_items')
-        .select('id, name, description, price, is_available, category_id, categories(name)')
+        .select('id, name, description, price, is_available, category_id, image_path, categories(name)')
         .order('name'),
       supabase.from('categories').select('id, name').order('name'),
       supabase.from('ingredients').select('id, name, unit').order('name'),
@@ -64,15 +70,25 @@ export default function MenuManagement() {
   }, [load])
 
   function reset() {
+    if (photoPreview) URL.revokeObjectURL(photoPreview)
     setForm(empty)
     setRecipe({})
     setEditingId(null)
+    setPhoto(null)
+    setPhotoPreview(null)
+    setCurrentPath(null)
+    setRemovePhoto(false)
     setError('')
   }
 
   async function startEdit(row: Row) {
     setError('')
     setEditingId(row.id)
+    if (photoPreview) URL.revokeObjectURL(photoPreview)
+    setCurrentPath(row.image_path)
+    setPhoto(null)
+    setPhotoPreview(null)
+    setRemovePhoto(false)
     setForm({
       name: row.name,
       price: String(row.price),
@@ -99,6 +115,27 @@ export default function MenuManagement() {
     })
   }
 
+  function pickPhoto(file: File) {
+    setError('')
+    if (!file.type.startsWith('image/')) return setError('Please choose an image file.')
+    if (file.size > 10 * 1024 * 1024) return setError('That photo is over 10 MB. Choose a smaller one.')
+    if (photoPreview) URL.revokeObjectURL(photoPreview)
+    setPhoto(file)
+    setPhotoPreview(URL.createObjectURL(file))
+    setRemovePhoto(false)
+  }
+
+  // First click drops a newly picked photo; clicking again removes the saved one
+  function dropPhoto() {
+    if (photoPreview) {
+      URL.revokeObjectURL(photoPreview)
+      setPhoto(null)
+      setPhotoPreview(null)
+    } else {
+      setRemovePhoto(true)
+    }
+  }
+
   async function save() {
     setError('')
     const name = form.name.trim()
@@ -110,7 +147,20 @@ export default function MenuManagement() {
       return setError('Enter an amount greater than 0 for each selected ingredient.')
 
     setBusy(true)
+    let uploaded: string | null = null
     try {
+      // Photo: upload a new one, or clear the old one
+      let imagePath = currentPath
+      let oldPath: string | null = null
+      if (photo) {
+        uploaded = await uploadMenuImage(photo)
+        imagePath = uploaded
+        oldPath = currentPath
+      } else if (removePhoto) {
+        imagePath = null
+        oldPath = currentPath
+      }
+
       // Find the category by name, or create it
       let categoryId: number | null = null
       const catName = form.category.trim()
@@ -134,6 +184,7 @@ export default function MenuManagement() {
         price,
         is_available: form.available,
         category_id: categoryId,
+        image_path: imagePath,
       }
 
       let id = editingId
@@ -160,9 +211,12 @@ export default function MenuManagement() {
         if (rErr) throw rErr
       }
 
+      uploaded = null // saved, so the new photo is now in use
       reset()
+      await deleteMenuImage(oldPath) // free the space of the replaced photo
       await load()
     } catch (e) {
+      await deleteMenuImage(uploaded) // don't leave an unused upload behind
       setError(msg(e))
     } finally {
       setBusy(false)
@@ -189,11 +243,13 @@ export default function MenuManagement() {
       )
       return
     }
+    await deleteMenuImage(row.image_path) // only after the item is really gone
     if (editingId === row.id) reset()
     await load()
   }
 
   const visible = tab === 'all' ? rows : rows.filter((r) => r.category_id === tab)
+  const shownPhoto = photoPreview ?? (removePhoto ? null : imageUrl(currentPath))
 
   return (
     <Layout>
@@ -240,6 +296,18 @@ export default function MenuManagement() {
                 key={row.id}
                 className="flex items-center gap-4 border-b border-[#eef1f5] py-4 last:border-0"
               >
+                {row.image_path ? (
+                  <img
+                    src={imageUrl(row.image_path) ?? ''}
+                    alt=""
+                    loading="lazy"
+                    className="h-16 w-16 shrink-0 rounded-2xl object-cover"
+                  />
+                ) : (
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-peach text-sm font-extrabold text-[#b23b06]">
+                    {row.name.slice(0, 2)}
+                  </div>
+                )}
                 <div className="flex-1">
                   <b>{row.name}</b>
                   <div className="mt-1.5 flex items-center gap-2">
@@ -306,6 +374,47 @@ export default function MenuManagement() {
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
+          </div>
+
+          <div>
+            <span className={label}>Photo (optional)</span>
+            <div className="flex items-center gap-3">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-field text-xs text-muted">
+                {shownPhoto ? (
+                  <img src={shownPhoto} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  'No photo'
+                )}
+              </div>
+              <div className="flex flex-col items-start gap-2">
+                <label
+                  htmlFor="photo"
+                  className="cursor-pointer rounded-full border border-[#d9dee7] px-4 py-2 text-sm font-semibold"
+                >
+                  {shownPhoto ? 'Change photo' : 'Add photo'}
+                </label>
+                <input
+                  id="photo"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="sr-only"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0]
+                    e.target.value = ''
+                    if (f) pickPhoto(f)
+                  }}
+                />
+                {shownPhoto && (
+                  <button
+                    type="button"
+                    onClick={dropPhoto}
+                    className="text-xs font-bold tracking-wider text-red-700"
+                  >
+                    REMOVE
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -436,4 +545,4 @@ export default function MenuManagement() {
       </div>
     </Layout>
   )
-}
+} 

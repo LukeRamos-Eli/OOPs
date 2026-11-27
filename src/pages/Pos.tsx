@@ -6,6 +6,7 @@ import { useMenu } from '../hooks/useMenu'
 import { useCart } from '../hooks/useCart'
 import { supabase } from '../lib/supabase'
 import { peso } from '../lib/format'
+import { imageUrl } from '../lib/images'
 import type { OrderType, PosItem, ReceiptData } from '../types/database'
 
 const card = 'rounded-[20px] bg-white shadow-[0_4px_24px_rgba(20,20,31,0.06)]'
@@ -140,6 +141,14 @@ export default function Pos() {
                   item.can_order ? 'hover:ring-2 hover:ring-brand' : 'opacity-60'
                 }`}
               >
+                {item.image_path && (
+                  <img
+                    src={imageUrl(item.image_path) ?? ''}
+                    alt=""
+                    loading="lazy"
+                    className="aspect-[4/3.5] w-full rounded-2xl object-cover"
+                  />
+                )}
                 <div className="flex items-center gap-2">
                   {item.category && (
                     <span className="rounded-xl bg-peach px-3 py-1 text-xs font-bold text-[#b23b06]">
