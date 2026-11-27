@@ -15,7 +15,7 @@ const nav = [
 
 const base = 'block w-full rounded-2xl px-4 py-3.5 text-left font-semibold'
 const on = 'bg-brand text-navy'
-const off = 'text-[#c9ccd6] transition-colors hover:bg-white/10 active:bg-white/20'
+const off = 'text-[#c9ccd6] hover:bg-white/10'
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { session, role } = useAuth()
@@ -59,7 +59,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           <button
             type="button"
             onClick={() => supabase.auth.signOut()}
-            className="h-11 rounded-xl border border-white/20 text-sm font-semibold transition-all hover:bg-white/10 active:bg-white/20 active:scale-[0.97]"
+            className="h-11 rounded-xl border border-white/20 text-sm font-semibold hover:bg-white/10"
           >
             Log out
           </button>

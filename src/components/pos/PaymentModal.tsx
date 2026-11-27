@@ -46,7 +46,7 @@ export default function PaymentModal({ total, busy, error, onConfirm, onClose }:
           <button
             type="button"
             onClick={() => setValue(String(total))}
-            className="h-11 rounded-full bg-peach px-4 text-sm font-semibold text-[#b23b06] transition-all hover:brightness-95 active:brightness-85 active:scale-[0.95]"
+            className="h-11 rounded-full bg-peach px-4 text-sm font-semibold text-[#b23b06]"
           >
             Exact
           </button>
@@ -55,7 +55,7 @@ export default function PaymentModal({ total, busy, error, onConfirm, onClose }:
               key={q}
               type="button"
               onClick={() => setValue(String(q))}
-              className="h-11 rounded-full bg-peach px-4 text-sm font-semibold text-[#b23b06] transition-all hover:brightness-95 active:brightness-85 active:scale-[0.95]"
+              className="h-11 rounded-full bg-peach px-4 text-sm font-semibold text-[#b23b06]"
             >
               {peso(q)}
             </button>
@@ -80,7 +80,7 @@ export default function PaymentModal({ total, busy, error, onConfirm, onClose }:
             type="button"
             onClick={onClose}
             disabled={busy}
-            className="h-13 flex-1 rounded-xl border border-[#d9dee7] font-semibold transition-all hover:bg-[#f0f2f5] active:bg-[#e3e7ee] active:scale-[0.97]"
+            className="h-13 flex-1 rounded-xl border border-[#d9dee7] font-semibold"
           >
             Cancel
           </button>
@@ -88,7 +88,7 @@ export default function PaymentModal({ total, busy, error, onConfirm, onClose }:
             type="button"
             onClick={() => onConfirm(tendered)}
             disabled={busy || tendered < total}
-            className="h-13 flex-1 rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97] disabled:opacity-40"
+            className="h-13 flex-1 rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy disabled:opacity-40"
           >
             {busy ? 'Processing…' : 'Confirm'}
           </button>
