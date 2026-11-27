@@ -20,9 +20,9 @@ export default function PaymentModal({ total, busy, error, onConfirm, onClose }:
       role="dialog"
       aria-modal="true"
       aria-label="Cash payment"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4"
+      className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4"
     >
-      <div className="flex w-full max-w-sm flex-col gap-4 rounded-3xl bg-white p-6">
+      <div className="modal-panel flex w-full max-w-sm flex-col gap-4 rounded-3xl bg-white p-6">
         <h2 className="text-xl font-extrabold">Cash payment</h2>
 
         <div className="flex items-center justify-between text-lg">

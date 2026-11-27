@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './lib/auth'
 import ProtectedRoute from './components/ProtectedRoute'
+import { PageSkeleton } from './components/Skeleton'
 import Login from './pages/Login'
 import Pos from './pages/Pos'
 import Transactions from './pages/Transactions'
@@ -12,16 +14,30 @@ import Users from './pages/admin/Users'
 
 function Home() {
   const { session, role, loading } = useAuth()
-  if (loading) return <p className="p-6">Loading…</p>
+  if (loading) return <PageSkeleton label="Checking your account…" />
   if (!session) return <Navigate to="/login" replace />
   return <Navigate to={role === 'admin' ? '/admin' : '/pos'} replace />
 }
 
 function LoginRoute() {
   const { session, loading } = useAuth()
-  if (loading) return <p className="p-6">Loading…</p>
-  if (session) return <Navigate to="/" replace />
-  return <Login />
+  const [loginPending, setLoginPending] = useState(false)
+  const [loginConfirmed, setLoginConfirmed] = useState(false)
+
+  if (loginConfirmed && session) return <Navigate to="/" replace />
+  if (loading && !loginPending) return <PageSkeleton label="Checking your account…" />
+  if (session && !loginPending) return <Navigate to="/" replace />
+
+  return (
+    <Login
+      onRequestStart={() => setLoginPending(true)}
+      onRequestFailed={() => setLoginPending(false)}
+      onSuccessAnimationComplete={() => {
+        setLoginPending(false)
+        setLoginConfirmed(true)
+      }}
+    />
+  )
 }
 
 export default function App() {

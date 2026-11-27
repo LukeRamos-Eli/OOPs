@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import Layout from '../components/Layout'
 import PaymentModal from '../components/pos/PaymentModal'
 import Receipt from '../components/pos/Receipt'
+import StateMessage from '../components/StateMessage'
+import { LoadingStatus, ProductGridSkeleton } from '../components/Skeleton'
 import { useMenu } from '../hooks/useMenu'
 import { useCart } from '../hooks/useCart'
 import { supabase } from '../lib/supabase'
@@ -19,7 +21,7 @@ function friendlyError(e: unknown) {
 }
 
 export default function Pos() {
-  const { categories, items, loading, error, reload } = useMenu()
+  const { categories, items, loading, refreshing, error, reload } = useMenu()
   const { lines, add, setQty, clear, total } = useCart()
   const [active, setActive] = useState<number | 'all'>('all')
   const [search, setSearch] = useState('')
@@ -39,8 +41,14 @@ export default function Pos() {
     )
   }, [items, active, search])
 
-  const warn = (item: PosItem, ok: boolean) =>
-    setNotice(ok ? '' : `Only ${item.max_servings ?? 0} available for ${item.name}.`)
+  const announce = (item: PosItem, ok: boolean, quantityChanged = false) =>
+    setNotice(
+      ok
+        ? quantityChanged
+          ? `${item.name} quantity updated.`
+          : `${item.name} added to the order.`
+        : `Only ${item.max_servings ?? 0} available for ${item.name}.`
+    )
 
   async function checkout(tendered: number) {
     setBusy(true)
@@ -96,7 +104,7 @@ export default function Pos() {
           <header className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-extrabold">New order</h1>
-              <p className="mt-1 text-muted">Tap an item to add it</p>
+              <p className="mt-1 text-muted">Use the + button on a product to add it</p>
             </div>
             <input
               type="search"
@@ -123,22 +131,50 @@ export default function Pos() {
             ))}
           </div>
 
-          {loading && <p className="text-muted">Loading menu…</p>}
-          {error && <p role="alert" className="text-red-700">{error}</p>}
+          {refreshing && <LoadingStatus label="Refreshing menu availability…" />}
+          {!loading && error && items.length === 0 && (
+            <StateMessage
+              variant="error"
+              title="Menu unavailable"
+              description="Menu items could not be loaded. Please try again."
+              action={
+                <button type="button" onClick={reload} className="text-sm font-bold text-brand-dark">
+                  Try again
+                </button>
+              }
+            />
+          )}
+          {!loading && error && items.length > 0 && (
+            <p role="alert" className="text-sm text-red-700">
+              Menu availability could not be refreshed. Showing previously loaded items.
+            </p>
+          )}
           {!loading && !error && items.length === 0 && (
-            <p className="text-muted">No menu items yet. An admin can add them under Menu.</p>
+            <StateMessage
+              title="No menu items yet"
+              description="An admin can add products from Menu Management."
+            />
           )}
 
           <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
-            {visible.map((item) => (
-              <button
+            {loading ? (
+              <>
+                <div className="col-span-full">
+                  <LoadingStatus label="Loading menu items…" />
+                </div>
+                <ProductGridSkeleton />
+              </>
+            ) : items.length > 0 && visible.length === 0 ? (
+              <div className="col-span-full">
+                <StateMessage
+                  title="No matching products"
+                  description="Try a different search or choose another category."
+                />
+              </div>
+            ) : items.length > 0 && visible.map((item) => (
+              <div
                 key={item.id}
-                type="button"
-                disabled={!item.can_order}
-                onClick={() => warn(item, add(item))}
-                className={`${card} flex flex-col gap-2 p-4 text-left ${
-                  item.can_order ? 'hover:ring-2 hover:ring-brand' : 'opacity-60'
-                }`}
+                className={`content-enter ${card} flex flex-col gap-2 p-4 ${item.can_order ? '' : 'opacity-60'}`}
               >
                 <div className="flex items-center gap-2">
                   {item.category && (
@@ -156,14 +192,17 @@ export default function Pos() {
                 <span className="text-xs text-muted">{item.description}</span>
                 <div className="mt-2 flex items-center justify-between">
                   <b className="text-base">{peso(item.price)}</b>
-                  <span
-                    aria-hidden="true"
+                  <button
+                    type="button"
+                    aria-label={`Add ${item.name} to order`}
+                    disabled={!item.can_order}
+                    onClick={() => announce(item, add(item))}
                     className="flex h-11 w-11 items-center justify-center rounded-full bg-brand text-xl font-extrabold text-navy"
                   >
                     +
-                  </span>
+                  </button>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         </section>
@@ -201,7 +240,7 @@ export default function Pos() {
           </div>
 
           {notice && (
-            <p role="status" className="px-6 text-sm text-[#8a2f04]">
+            <p role="status" className="content-enter px-6 text-sm text-[#8a2f04]">
               {notice}
             </p>
           )}
@@ -209,7 +248,7 @@ export default function Pos() {
           <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-6">
             {lines.length === 0 && <p className="text-muted">The cart is empty.</p>}
             {lines.map((l) => (
-              <div key={l.item.id} className="flex items-center gap-3">
+              <div key={l.item.id} className="content-enter flex items-center gap-3">
                 <div className="flex-1">
                   <b>{l.item.name}</b>
                   <div className="text-muted">{peso(l.item.price)}</div>
@@ -227,7 +266,7 @@ export default function Pos() {
                   <button
                     type="button"
                     aria-label={`Increase ${l.item.name}`}
-                    onClick={() => warn(l.item, setQty(l.item.id, l.qty + 1))}
+                    onClick={() => announce(l.item, setQty(l.item.id, l.qty + 1), true)}
                     className="h-10 w-10 rounded-full bg-[#32343e]"
                   >
                     +

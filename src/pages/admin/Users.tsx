@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Layout from '../../components/Layout'
+import StateMessage from '../../components/StateMessage'
+import { LoadingStatus, TableSkeleton } from '../../components/Skeleton'
 import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
 
@@ -31,6 +33,8 @@ export default function Users() {
 
   const [rows, setRows] = useState<Staff[]>([])
   const [loaded, setLoaded] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+  const hasLoaded = useRef(false)
   const [tick, setTick] = useState(0)
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
@@ -42,21 +46,38 @@ export default function Users() {
 
   useEffect(() => {
     let cancelled = false
-    supabase.rpc('list_staff').then(({ data, error }) => {
+    Promise.resolve(supabase.rpc('list_staff')).then(({ data, error }) => {
       if (cancelled) return
       if (error) {
-        setError(error.message)
+        setError(hasLoaded.current ? 'Staff accounts could not be refreshed.' : 'Staff accounts could not be loaded.')
+        setLoaded(true)
+        hasLoaded.current = true
         return
       }
       setRows((data ?? []) as Staff[])
+      setError('')
       setLoaded(true)
+      hasLoaded.current = true
+    }).catch(() => {
+      if (!cancelled) {
+        setError(hasLoaded.current ? 'Staff accounts could not be refreshed.' : 'Staff accounts could not be loaded.')
+        setLoaded(true)
+        hasLoaded.current = true
+      }
+    }).finally(() => {
+      if (!cancelled) setRefreshing(false)
     })
     return () => {
       cancelled = true
     }
   }, [tick])
 
-  const reload = () => setTick((t) => t + 1)
+  const reload = () => {
+    setError('')
+    if (rows.length === 0) setLoaded(false)
+    setRefreshing(true)
+    setTick((t) => t + 1)
+  }
 
   async function create() {
     setError('')
@@ -84,9 +105,17 @@ export default function Users() {
   async function changeRole(s: Staff, role: Role) {
     setError('')
     setNotice('')
-    const { error } = await supabase.from('profiles').update({ role }).eq('id', s.id)
-    if (error) setError(error.message)
-    reload() // also resets the dropdown if the change was refused
+    setBusy(true)
+    try {
+      const { error } = await supabase.from('profiles').update({ role }).eq('id', s.id)
+      if (error) setError('The account role could not be updated.')
+      else setNotice(`Updated the role for ${s.email}.`)
+    } catch {
+      setError('The account role could not be updated.')
+    } finally {
+      setBusy(false)
+      reload() // also resets the dropdown if the change was refused
+    }
   }
 
   async function toggleActive(s: Staff) {
@@ -94,9 +123,17 @@ export default function Users() {
     if (!window.confirm(`${action} ${s.email}?`)) return
     setError('')
     setNotice('')
-    const { error } = await supabase.rpc('set_staff_active', { p_id: s.id, p_active: !s.active })
-    if (error) setError(error.message)
-    reload()
+    setBusy(true)
+    try {
+      const { error } = await supabase.rpc('set_staff_active', { p_id: s.id, p_active: !s.active })
+      if (error) setError(`The account could not be ${s.active ? 'deactivated' : 'reactivated'}.`)
+      else setNotice(`${s.email} ${s.active ? 'deactivated' : 'reactivated'}.`)
+    } catch {
+      setError(`The account could not be ${s.active ? 'deactivated' : 'reactivated'}.`)
+    } finally {
+      setBusy(false)
+      reload()
+    }
   }
 
   function openEdit(s: Staff) {
@@ -234,16 +271,45 @@ export default function Users() {
           </p>
         )}
         {notice && (
-          <p role="status" className="text-sm text-[#17663a]">
+          <p role="status" className="content-enter text-sm text-[#17663a]">
             {notice}
           </p>
         )}
 
         <div className={`${card} p-6`}>
           {!loaded ? (
-            <p className="text-muted">{error ? '' : 'Loading…'}</p>
+            <div className="overflow-x-auto">
+              <div className="min-w-[700px]">
+                <TableSkeleton
+                  label="Loading staff accounts…"
+                  rows={5}
+                  columns={5}
+                  columnWidths={['1.8fr', '0.8fr', '0.9fr', '1.4fr', '0.8fr']}
+                />
+              </div>
+            </div>
+          ) : error && rows.length === 0 ? (
+            <StateMessage
+              variant="error"
+              title="Staff accounts unavailable"
+              description="We couldn't retrieve staff accounts. Please try again."
+              action={
+                <button type="button" onClick={reload} className="text-sm font-bold text-brand-dark">
+                  Try again
+                </button>
+              }
+            />
           ) : (
-            <table className="w-full border-collapse text-left">
+            <>
+            {refreshing && <LoadingStatus label="Refreshing staff accounts…" className="mb-4" />}
+            {rows.length === 0 ? (
+              <StateMessage
+                title="No staff accounts yet"
+                description="Create an account to give a team member access to KAPOS."
+              />
+            ) : (
+            <div className="content-enter overflow-x-auto">
+            <table className="w-full min-w-[700px] border-collapse text-left">
               <thead>
                 <tr className="text-muted">
                   {['Account', 'Role', 'Status', 'Last sign-in', ''].map((h) => (
@@ -269,7 +335,7 @@ export default function Users() {
                       <select
                         aria-label={`Role for ${s.email}`}
                         value={s.role}
-                        disabled={s.id === me}
+                        disabled={s.id === me || busy}
                         title={s.id === me ? 'You cannot change your own role' : undefined}
                         onChange={(e) => changeRole(s, e.target.value as Role)}
                         className="h-10 rounded-xl bg-field px-3 text-sm disabled:opacity-60"
@@ -300,6 +366,7 @@ export default function Users() {
                         <button
                           type="button"
                           onClick={() => toggleActive(s)}
+                          disabled={busy}
                           className="text-xs font-bold tracking-wider text-red-700"
                         >
                           {s.active ? 'DEACTIVATE' : 'REACTIVATE'}
@@ -310,6 +377,9 @@ export default function Users() {
                 ))}
               </tbody>
             </table>
+            </div>
+            )}
+            </>
           )}
         </div>
       </div>
