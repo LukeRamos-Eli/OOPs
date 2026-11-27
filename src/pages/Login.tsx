@@ -1,9 +1,16 @@
 import { useState, type FormEvent } from 'react'
 import { supabase } from '../lib/supabase'
 
-const label = 'mb-2 block text-xs font-bold uppercase tracking-widest text-[#32343e]'
-const field =
-  'h-13 w-full rounded-xl bg-field px-4 text-sm text-navy outline-none placeholder:text-[#6b6e7c] focus:ring-2 focus:ring-brand'
+// The photo fades into the dark background as it goes left
+const fade = 'linear-gradient(90deg, transparent 0%, rgba(0,0,0,.55) 22%, #000 55%)'
+const shade =
+  'linear-gradient(180deg, rgba(38,40,54,.55) 0%, rgba(38,40,54,0) 30%, rgba(38,40,54,0) 68%, rgba(38,40,54,.65) 100%)'
+
+const fieldBox =
+  'group relative flex h-15 flex-col justify-center rounded-2xl border-2 border-transparent bg-[#373947] px-5 pr-14 focus-within:border-brand focus-within:shadow-[0_0_0_4px_rgba(255,118,33,0.18)]'
+const fieldLabel = 'text-xs leading-none text-[#a5a8b8] group-focus-within:text-[#ff8a4c]'
+const fieldInput =
+  'login-input mt-1 w-full bg-transparent text-[15px] font-semibold text-white outline-none placeholder:text-[#8d90a1]'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -22,37 +29,46 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-navy p-6">
-      <div className="flex w-full max-w-110 flex-col items-center gap-5">
-        <div className="flex items-center gap-3">
-          <span className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-brand text-[22px] font-extrabold text-navy">
-            K
-          </span>
-          <span className="text-2xl font-extrabold text-white">KaPOS</span>
-        </div>
-
-        <div className="text-center">
-          <h1 className="text-4xl font-extrabold text-white">Log In</h1>
-          <p className="mt-2 text-[#c9ccd6]">Please sign in to your account</p>
-        </div>
-
-        <form
-          onSubmit={handleSubmit}
-          className="flex w-full flex-col gap-5 rounded-3xl bg-white p-8"
+    <div className="min-h-screen bg-[#262836]">
+      <div className="relative flex min-h-screen w-full flex-col overflow-hidden bg-[#262836] text-white">
+        {/* Photo, right side only */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-y-0 right-0 hidden w-[63%] lg:block"
+          style={{ WebkitMaskImage: fade, maskImage: fade }}
         >
-          <div>
-            <label htmlFor="email" className={label}>Email</label>
-            <input
-              id="email"
-              type="email"
-              required
-              autoComplete="email"
-              placeholder="name@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={field}
-            />
+          <img
+            src="/login-food.jpg"
+            alt=""
+            className="h-full w-full object-cover object-right brightness-[0.62] saturate-90"
+          />
+          <div className="absolute inset-0" style={{ background: shade }} />
+        </div>
+
+        {/* Top bar */}
+        <header className="relative z-10 flex items-center gap-11 px-6 pt-8 sm:px-12 sm:pt-11 lg:px-16">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-lg font-extrabold text-navy">
+              K
+            </span>
+            <b className="text-lg">
+              KaPOS<span className="text-brand">.</span>
+            </b>
           </div>
+          <span className="hidden font-semibold text-[#b4b7c6] sm:inline">Home</span>
+          <span className="hidden font-semibold text-[#b4b7c6] sm:inline">Help</span>
+        </header>
+
+        {/* Form */}
+        <main className="relative z-10 flex flex-1 items-center px-6 pb-28 pt-10 sm:px-12 lg:pl-28">
+          <form onSubmit={handleSubmit} className="w-full max-w-[30rem]">
+            <p className="text-xs font-bold tracking-[0.12em] text-[#b4b7c6]">WELCOME BACK</p>
+            <h1 className="mb-3.5 mt-3 text-5xl font-extrabold leading-[1.1] sm:text-6xl">
+              Log in<span className="text-brand">.</span>
+            </h1>
+            <p className="text-[15px] text-[#b4b7c6]">
+              Need an account? <span className="font-semibold text-[#ff8a4c]">Ask your manager.</span>
+            </p>
 
           <div>
             <label htmlFor="password" className={label}>Password</label>
@@ -78,12 +94,46 @@ export default function Login() {
                   <circle cx="12" cy="12" r="3" />
                   {showPassword && <path d="M3 3l18 18" />}
                 </svg>
-              </button>
-            </div>
-          </div>
+              </div>
 
-          <div className="flex items-center justify-between text-sm text-muted">
-            <label className="flex items-center gap-2">
+              <div className={fieldBox}>
+                <label htmlFor="password" className={fieldLabel}>
+                  Password
+                </label>
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  autoComplete="current-password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className={fieldInput}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  className="absolute right-1.5 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#c9ccd6"
+                    strokeWidth="2"
+                    aria-hidden="true"
+                  >
+                    <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+                    <circle cx="12" cy="12" r="3" />
+                    {showPassword && <path d="M3 3l18 18" />}
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <label className="mt-5 flex w-fit items-center gap-2.5 text-[15px] text-[#b4b7c6]">
               <input type="checkbox" className="h-5 w-5 accent-brand" />
               Remember me
             </label>
@@ -104,10 +154,15 @@ export default function Login() {
             {busy ? 'Signing in…' : 'Log in'}
           </button>
 
-          <p className="text-center text-[13px] text-muted">
-            Accounts are created by your manager.
-          </p>
-        </form>
+            <button
+              type="submit"
+              disabled={busy}
+              className="mt-7 h-14 w-full rounded-full bg-brand text-base font-extrabold text-navy shadow-[0_10px_30px_rgba(255,118,33,0.4)] hover:brightness-95 disabled:opacity-60"
+            >
+              {busy ? 'Signing in…' : 'Log in'}
+            </button>
+          </form>
+        </main>
       </div>
     </div>
   )
