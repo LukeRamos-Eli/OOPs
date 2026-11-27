@@ -113,7 +113,7 @@ export default function Inventory() {
           <button
             type="button"
             onClick={openNew}
-            className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy"
+            className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97]"
           >
             + Add ingredient
           </button>
@@ -180,14 +180,14 @@ export default function Inventory() {
                 type="button"
                 onClick={save}
                 disabled={busy}
-                className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy disabled:opacity-60"
+                className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97] disabled:opacity-60"
               >
                 {busy ? 'Saving…' : 'Save'}
               </button>
               <button
                 type="button"
                 onClick={() => setShowForm(false)}
-                className="h-13 rounded-xl border border-[#d9dee7] px-7 font-semibold"
+                className="h-13 rounded-xl border border-[#d9dee7] px-7 font-semibold transition-all hover:bg-[#f0f2f5] active:bg-[#e3e7ee] active:scale-[0.97]"
               >
                 Cancel
               </button>
@@ -217,8 +217,8 @@ export default function Inventory() {
               key={t}
               type="button"
               onClick={() => setTab(t)}
-              className={`py-3 font-semibold ${
-                tab === t ? 'border-b-[3px] border-brand text-navy' : 'text-muted'
+              className={`py-3 font-semibold transition-colors ${
+                tab === t ? 'border-b-[3px] border-brand text-navy' : 'text-muted hover:text-navy'
               }`}
             >
               {t}
@@ -268,14 +268,14 @@ export default function Inventory() {
                         <button
                           type="button"
                           onClick={() => openEdit(r)}
-                          className="text-xs font-bold tracking-wider text-brand-dark"
+                          className="text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]"
                         >
                           EDIT
                         </button>
                         <button
                           type="button"
                           onClick={() => remove(r)}
-                          className="text-xs font-bold tracking-wider text-red-700"
+                          className="text-xs font-bold tracking-wider text-red-700 transition-colors hover:text-red-900 active:text-red-950"
                         >
                           DELETE
                         </button>

@@ -174,7 +174,7 @@ export default function Reports() {
             type="button"
             onClick={exportCsv}
             disabled={!ready || !!report?.error}
-            className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy disabled:opacity-40"
+            className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97] disabled:opacity-40"
           >
             Export CSV
           </button>
@@ -190,8 +190,8 @@ export default function Reports() {
                   setFrom(p.from)
                   setTo(p.to)
                 }}
-                className={`h-11 rounded-full border px-5 text-sm font-semibold ${
-                  activePreset === p.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white'
+                className={`h-11 rounded-full border px-5 text-sm font-semibold transition-all active:scale-[0.95] ${
+                  activePreset === p.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5] active:bg-[#e3e7ee]'
                 }`}
               >
                 {p.label}
@@ -210,7 +210,7 @@ export default function Reports() {
             <button
               type="button"
               onClick={() => setTick((t) => t + 1)}
-              className="mb-3 text-xs font-bold tracking-wider text-brand-dark"
+              className="mb-3 text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]"
             >
               REFRESH
             </button>

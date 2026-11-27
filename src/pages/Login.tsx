@@ -71,7 +71,7 @@ export default function Login() {
                 type="button"
                 onClick={() => setShowPassword((s) => !s)}
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center"
+                className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-xl transition-colors hover:bg-field active:bg-[#dce3ec]"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5e6270" strokeWidth="2" aria-hidden="true">
                   <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
@@ -87,7 +87,7 @@ export default function Login() {
               <input type="checkbox" className="h-5 w-5 accent-brand" />
               Remember me
             </label>
-            <button type="button" className="text-xs font-bold tracking-wider text-brand-dark">
+            <button type="button" className="text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]">
               FORGOT PASSWORD
             </button>
           </div>
@@ -99,7 +99,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={busy}
-            className="h-13 w-full rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy hover:brightness-95 disabled:opacity-60"
+            className="h-13 w-full rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97] disabled:opacity-60"
           >
             {busy ? 'Signing in…' : 'Log in'}
           </button>
