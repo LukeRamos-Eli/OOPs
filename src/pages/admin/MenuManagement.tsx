@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Layout from '../../components/Layout'
+import StateMessage from '../../components/StateMessage'
+import { LoadingStatus, Skeleton } from '../../components/Skeleton'
 import { supabase } from '../../lib/supabase'
 import { peso } from '../../lib/format'
 import type { Category } from '../../types/database'
@@ -35,38 +37,67 @@ export default function MenuManagement() {
   const [recipe, setRecipe] = useState<Record<number, string>>({})
   const [editingId, setEditingId] = useState<number | null>(null)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const [recipeLoading, setRecipeLoading] = useState(false)
+  const [pendingItemId, setPendingItemId] = useState<number | null>(null)
+  const hasLoadedSuccessfully = useRef(false)
+  const requestId = useRef(0)
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
   const [currentPath, setCurrentPath] = useState<string | null>(null)
   const [removePhoto, setRemovePhoto] = useState(false)
 
   const load = useCallback(async () => {
-    const [m, c, i, a] = await Promise.all([
-      supabase
-        .from('menu_items')
-        .select('id, name, description, price, is_available, category_id, image_path, categories(name)')
-        .order('name'),
-      supabase.from('categories').select('id, name').order('name'),
-      supabase.from('ingredients').select('id, name, unit').order('name'),
-      supabase.from('menu_availability').select('menu_item_id, max_servings'),
-    ])
-    const err = m.error ?? c.error ?? i.error ?? a.error
-    if (err) {
-      setError(err.message)
-      return
+    const request = ++requestId.current
+    if (hasLoadedSuccessfully.current) setRefreshing(true)
+    else setLoading(true)
+    setError('')
+    try {
+      const [m, c, i, a] = await Promise.all([
+        supabase
+          .from('menu_items')
+          .select('id, name, description, price, is_available, category_id, image_path, categories(name)')
+          .order('name'),
+        supabase.from('categories').select('id, name').order('name'),
+        supabase.from('ingredients').select('id, name, unit').order('name'),
+        supabase.from('menu_availability').select('menu_item_id, max_servings'),
+      ])
+      if (request !== requestId.current) return
+      const err = m.error ?? c.error ?? i.error ?? a.error
+      if (err) throw err
+      const s: Record<number, number | null> = {}
+      for (const r of a.data ?? []) s[r.menu_item_id] = r.max_servings
+      setRows((m.data ?? []) as unknown as Row[])
+      setCategories(c.data ?? [])
+      setIngredients(i.data ?? [])
+      setServings(s)
+      setError('')
+      hasLoadedSuccessfully.current = true
+    } catch {
+      if (request === requestId.current) {
+        setError(
+          hasLoadedSuccessfully.current
+            ? 'Menu could not be refreshed. Showing previously loaded items.'
+            : 'Menu could not be loaded. Please try again.'
+        )
+      }
+    } finally {
+      if (request === requestId.current) {
+        setLoading(false)
+        setRefreshing(false)
+      }
     }
-    const s: Record<number, number | null> = {}
-    for (const r of a.data ?? []) s[r.menu_item_id] = r.max_servings
-    setRows((m.data ?? []) as unknown as Row[])
-    setCategories(c.data ?? [])
-    setIngredients(i.data ?? [])
-    setServings(s)
   }, [])
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    load()
+    void load()
+    return () => {
+      requestId.current += 1
+    }
   }, [load])
 
   function reset() {
@@ -79,6 +110,7 @@ export default function MenuManagement() {
     setCurrentPath(null)
     setRemovePhoto(false)
     setError('')
+    setRecipeLoading(false)
   }
 
   async function startEdit(row: Row) {
@@ -96,14 +128,21 @@ export default function MenuManagement() {
       description: row.description ?? '',
       available: row.is_available,
     })
-    const { data, error } = await supabase
-      .from('recipes')
-      .select('ingredient_id, qty_used')
-      .eq('menu_item_id', row.id)
-    if (error) return setError(error.message)
-    const next: Record<number, string> = {}
-    for (const r of data ?? []) next[r.ingredient_id] = String(r.qty_used)
-    setRecipe(next)
+    setRecipeLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('recipes')
+        .select('ingredient_id, qty_used')
+        .eq('menu_item_id', row.id)
+      if (error) throw error
+      const next: Record<number, string> = {}
+      for (const r of data ?? []) next[r.ingredient_id] = String(r.qty_used)
+      setRecipe(next)
+    } catch {
+      setError('This item’s recipe could not be loaded. Please try again.')
+    } finally {
+      setRecipeLoading(false)
+    }
   }
 
   function toggleIngredient(id: number) {
@@ -138,6 +177,7 @@ export default function MenuManagement() {
 
   async function save() {
     setError('')
+    setNotice('')
     const name = form.name.trim()
     const price = Number(form.price)
     const picked = Object.entries(recipe)
@@ -196,6 +236,7 @@ export default function MenuManagement() {
         const { error } = await supabase.from('menu_items').update(payload).eq('id', id)
         if (error) throw error
       }
+      uploaded = null
 
       // Replace the recipe
       const { error: dErr } = await supabase.from('recipes').delete().eq('menu_item_id', id)
@@ -211,10 +252,11 @@ export default function MenuManagement() {
         if (rErr) throw rErr
       }
 
-      uploaded = null // saved, so the new photo is now in use
+      const savedNotice = editingId === null ? 'Menu item added.' : 'Menu item updated.'
       reset()
       await deleteMenuImage(oldPath) // free the space of the replaced photo
       await load()
+      setNotice(savedNotice)
     } catch (e) {
       await deleteMenuImage(uploaded) // don't leave an unused upload behind
       setError(msg(e))
@@ -224,28 +266,50 @@ export default function MenuManagement() {
   }
 
   async function toggleAvailable(row: Row) {
-    const { error } = await supabase
-      .from('menu_items')
-      .update({ is_available: !row.is_available })
-      .eq('id', row.id)
-    if (error) setError(error.message)
-    else await load()
+    setError('')
+    setNotice('')
+    setPendingItemId(row.id)
+    try {
+      const { error } = await supabase
+        .from('menu_items')
+        .update({ is_available: !row.is_available })
+        .eq('id', row.id)
+      if (error) setError('Availability could not be updated.')
+      else {
+        await load()
+        setNotice(`${row.name} availability updated.`)
+      }
+    } catch {
+      setError('Availability could not be updated.')
+    } finally {
+      setPendingItemId(null)
+    }
   }
 
   async function remove(row: Row) {
     if (!window.confirm(`Delete "${row.name}"?`)) return
-    const { error } = await supabase.from('menu_items').delete().eq('id', row.id)
-    if (error) {
-      setError(
-        error.code === '23503'
-          ? `"${row.name}" has past orders, so it can't be deleted. Mark it Unavailable instead.`
-          : error.message
-      )
-      return
+    setError('')
+    setNotice('')
+    setPendingItemId(row.id)
+    try {
+      const { error } = await supabase.from('menu_items').delete().eq('id', row.id)
+      if (error) {
+        setError(
+          error.code === '23503'
+            ? `"${row.name}" has past orders, so it can't be deleted. Mark it Unavailable instead.`
+            : 'The menu item could not be deleted.'
+        )
+        return
+      }
+      await deleteMenuImage(row.image_path)
+      if (editingId === row.id) reset()
+      await load()
+      setNotice(`${row.name} deleted.`)
+    } catch {
+      setError('The menu item could not be deleted.')
+    } finally {
+      setPendingItemId(null)
     }
-    await deleteMenuImage(row.image_path) // only after the item is really gone
-    if (editingId === row.id) reset()
-    await load()
   }
 
   const visible = tab === 'all' ? rows : rows.filter((r) => r.category_id === tab)
@@ -287,14 +351,44 @@ export default function MenuManagement() {
             ))}
           </div>
 
+          {notice && <p role="status" className="content-enter text-sm text-[#17663a]">{notice}</p>}
+
           <div className={`${card} px-6 py-2`}>
-            {visible.length === 0 && (
-              <p className="py-6 text-muted">No items yet. Use the form to add one.</p>
-            )}
-            {visible.map((row) => (
+            {refreshing && <LoadingStatus label="Refreshing menu…" className="py-3" />}
+            {loading ? (
+              <div className="space-y-4 py-4">
+                <LoadingStatus label="Loading menu items…" />
+                {Array.from({ length: 5 }, (_, index) => (
+                  <div key={index} aria-hidden="true" className="flex items-center gap-4 border-b border-[#eef1f5] py-4">
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-2/3" />
+                      <Skeleton className="h-3 w-1/3" />
+                    </div>
+                    <Skeleton className="h-7 w-24" />
+                    <Skeleton className="h-4 w-20" />
+                  </div>
+                ))}
+              </div>
+            ) : error && rows.length === 0 ? (
+              <StateMessage
+                variant="error"
+                title="Menu unavailable"
+                description="We couldn't retrieve menu items. Please try again."
+                action={
+                  <button type="button" onClick={load} className="text-sm font-bold text-brand-dark">
+                    Try again
+                  </button>
+                }
+              />
+            ) : visible.length === 0 ? (
+              <StateMessage
+                title={rows.length === 0 ? 'No menu items yet' : 'No items in this category'}
+                description={rows.length === 0 ? 'Use the menu form to add your first item.' : 'Choose another category to view its items.'}
+              />
+            ) : visible.map((row) => (
               <div
                 key={row.id}
-                className="flex items-center gap-4 border-b border-[#eef1f5] py-4 last:border-0"
+                className="content-enter flex items-center gap-4 border-b border-[#eef1f5] py-4 last:border-0"
               >
                 {row.image_path ? (
                   <img
@@ -324,6 +418,7 @@ export default function MenuManagement() {
                 <button
                   type="button"
                   onClick={() => toggleAvailable(row)}
+                  disabled={pendingItemId === row.id}
                   aria-label={`Toggle availability of ${row.name}`}
                   className={`rounded-xl px-3 py-1 text-xs font-bold ${
                     row.is_available ? 'bg-[#e3f5ea] text-[#17663a]' : 'bg-[#e7eaf0] text-[#3f4350]'
@@ -335,6 +430,7 @@ export default function MenuManagement() {
                 <button
                   type="button"
                   onClick={() => startEdit(row)}
+                  disabled={pendingItemId === row.id}
                   className="text-xs font-bold tracking-wider text-brand-dark"
                 >
                   EDIT
@@ -342,6 +438,7 @@ export default function MenuManagement() {
                 <button
                   type="button"
                   onClick={() => remove(row)}
+                  disabled={pendingItemId === row.id}
                   className="text-xs font-bold tracking-wider text-red-700"
                 >
                   DELETE
@@ -451,7 +548,9 @@ export default function MenuManagement() {
 
           <div>
             <span className={label}>Ingredients used</span>
-            {ingredients.length === 0 ? (
+            {recipeLoading ? (
+              <LoadingStatus label="Loading recipe…" />
+            ) : ingredients.length === 0 ? (
               <p className="text-sm text-muted">Add ingredients in Inventory first.</p>
             ) : (
               <div className="flex flex-wrap gap-3">
@@ -536,13 +635,13 @@ export default function MenuManagement() {
           <button
             type="button"
             onClick={save}
-            disabled={busy}
+            disabled={busy || recipeLoading}
             className="h-13 rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy disabled:opacity-60"
           >
-            {busy ? 'Saving…' : 'Save changes'}
+            {busy ? 'Saving…' : recipeLoading ? 'Loading recipe…' : 'Save changes'}
           </button>
         </aside>
       </div>
     </Layout>
   )
-} 
+}

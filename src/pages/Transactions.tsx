@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import Layout from '../components/Layout'
+import RefreshButton from '../components/RefreshButton'
+import StateMessage from '../components/StateMessage'
+import { TableSkeleton } from '../components/Skeleton'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { peso } from '../lib/format'
@@ -96,10 +99,11 @@ export default function Transactions() {
   const [tick, setTick] = useState(0)
   const [search, setSearch] = useState('')
   const [result, setResult] = useState<Result | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
   const [selected, setSelected] = useState<Order | null>(null)
 
   const invalid = !from || !to ? 'Pick both dates.' : from > to ? 'The start date must be on or before the end date.' : ''
-  const key = `${from}|${to}|${status}|${limit}|${tick}`
+  const key = `${from}|${to}|${status}|${limit}`
 
   useEffect(() => {
     if (invalid) return
@@ -116,13 +120,26 @@ export default function Transactions() {
       .limit(limit)
     q = status === 'all' ? q.in('status', ['completed', 'cancelled']) : q.eq('status', status)
 
-    q.then(({ data, error }) => {
-      if (cancelled) return
-      setResult({
-        key,
-        orders: ((data ?? []) as unknown as Raw[]).map(toOrder),
-        error: error?.message ?? '',
-      })
+    Promise.resolve(q).then(({ data, error }) => {
+      if (!cancelled) {
+        setResult((current) => ({
+          key,
+          orders: error && current?.key === key
+            ? current.orders
+            : ((data ?? []) as unknown as Raw[]).map(toOrder),
+          error: error?.message ?? '',
+        }))
+      }
+    }).catch(() => {
+      if (!cancelled) {
+        setResult((current) => ({
+          key,
+          orders: current?.key === key ? current.orders : [],
+          error: 'Transactions could not be loaded. Please try again.',
+        }))
+      }
+    }).finally(() => {
+      if (!cancelled) setRefreshing(false)
     })
     return () => {
       cancelled = true
@@ -162,13 +179,13 @@ export default function Transactions() {
             <h1 className="text-2xl font-extrabold">Transactions</h1>
             <p className="mt-1 text-muted">{isAdmin ? 'All orders' : 'Your orders'}</p>
           </div>
-          <button
-            type="button"
-            onClick={() => setTick((t) => t + 1)}
-            className="text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]"
-          >
-            REFRESH
-          </button>
+          <RefreshButton
+            refreshing={refreshing}
+            onClick={() => {
+              setRefreshing(true)
+              setTick((t) => t + 1)
+            }}
+          />
         </header>
 
         <div className={`${card} flex flex-wrap items-end gap-4 p-5`}>
@@ -240,19 +257,47 @@ export default function Transactions() {
             {invalid}
           </p>
         )}
-        {result?.error && (
+        {ready && result.error && orders.length > 0 && (
           <p role="alert" className="text-sm text-red-700">
-            {result.error}
+            Could not refresh transactions. Showing the most recently loaded results.
           </p>
         )}
-
         <div className={`${card} p-6`}>
           {!ready ? (
-            <p className="text-muted">{invalid ? '' : 'Loading…'}</p>
+            invalid ? null : (
+              <div className="overflow-x-auto">
+                <div className="min-w-[720px]">
+                  <TableSkeleton
+                    label="Loading transactions…"
+                    rows={5}
+                    columns={isAdmin ? 8 : 7}
+                    columnWidths={
+                      isAdmin
+                        ? ['0.6fr', '1.4fr', '0.8fr', '1fr', '1.8fr', '0.9fr', '0.9fr', '0.5fr']
+                        : ['0.6fr', '1.4fr', '0.8fr', '2fr', '0.9fr', '0.9fr', '0.5fr']
+                    }
+                  />
+                </div>
+              </div>
+            )
+          ) : result?.error && orders.length === 0 ? (
+            <StateMessage
+              variant="error"
+              title="Transactions unavailable"
+              description="We couldn't retrieve these transactions. Please refresh and try again."
+            />
           ) : shown.length === 0 ? (
-            <p className="text-muted">No transactions found for these filters.</p>
+            <StateMessage
+              title={search.trim() ? 'No matching transactions' : 'No transactions found'}
+              description={
+                search.trim()
+                  ? 'Try another order number or clear your search.'
+                  : 'There are no transactions for the selected dates and status.'
+              }
+            />
           ) : (
-            <table className="w-full border-collapse text-left">
+            <div className="content-enter overflow-x-auto">
+            <table className="w-full min-w-[720px] border-collapse text-left">
               <thead>
                 <tr className="text-muted">
                   {['Order', 'Date & time', 'Type', ...(isAdmin ? ['Cashier'] : []), 'Items', 'Total', 'Status', ''].map(
@@ -297,6 +342,7 @@ export default function Transactions() {
                 ))}
               </tbody>
             </table>
+            </div>
           )}
           {hasMore && (
             <button
@@ -316,11 +362,11 @@ export default function Transactions() {
           aria-modal="true"
           aria-label={`Order ${selected.id}`}
           onClick={() => setSelected(null)}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4"
+          className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-3xl bg-white p-6 font-mono text-sm"
+            className="modal-panel w-full max-w-sm rounded-3xl bg-white p-6 font-mono text-sm"
           >
             <div className="mb-3 text-center">
               <div className="text-lg font-bold">KaPOS</div>

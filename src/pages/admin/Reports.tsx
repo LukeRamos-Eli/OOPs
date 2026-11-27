@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import Layout from '../../components/Layout'
+import RefreshButton from '../../components/RefreshButton'
+import StateMessage from '../../components/StateMessage'
+import { CardSkeleton, LoadingStatus, TableSkeleton } from '../../components/Skeleton'
 import { supabase } from '../../lib/supabase'
 import { peso } from '../../lib/format'
 
@@ -57,6 +60,8 @@ export default function Reports() {
   const [to, setTo] = useState(today)
   const [tick, setTick] = useState(0)
   const [report, setReport] = useState<Report | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
+  const [requestError, setRequestError] = useState('')
 
   const span = from && to ? (Date.parse(to) - Date.parse(from)) / 86_400_000 + 1 : 0
   const invalid = !from || !to
@@ -74,25 +79,41 @@ export default function Reports() {
       supabase.rpc('report_daily', { p_from: from, p_to: to }),
       supabase.rpc('report_items', { p_from: from, p_to: to }),
     ]).then(([d, i]) => {
-      if (cancelled) return
-      setReport({
-        from,
-        to,
-        days: ((d.data ?? []) as Day[]).map((r) => ({
-          sale_date: r.sale_date,
-          transactions: Number(r.transactions),
-          dine_in: Number(r.dine_in),
-          takeout: Number(r.takeout),
-          revenue: Number(r.revenue),
-        })),
-        items: ((i.data ?? []) as Item[]).map((r) => ({
-          item_name: r.item_name,
-          category_name: r.category_name,
-          units_sold: Number(r.units_sold),
-          revenue: Number(r.revenue),
-        })),
-        error: (d.error ?? i.error)?.message ?? '',
-      })
+      if (!cancelled) {
+        const failed = !!(d.error ?? i.error)
+        setRequestError(failed ? 'The report could not be refreshed. Showing the previous report when available.' : '')
+        setReport((current) => {
+          if (failed && current?.from === from && current.to === to) return current
+          return {
+            from,
+            to,
+            days: ((d.data ?? []) as Day[]).map((r) => ({
+              sale_date: r.sale_date,
+              transactions: Number(r.transactions),
+              dine_in: Number(r.dine_in),
+              takeout: Number(r.takeout),
+              revenue: Number(r.revenue),
+            })),
+            items: ((i.data ?? []) as Item[]).map((r) => ({
+              item_name: r.item_name,
+              category_name: r.category_name,
+              units_sold: Number(r.units_sold),
+              revenue: Number(r.revenue),
+            })),
+            error: failed ? 'Unable to load the report.' : '',
+          }
+        })
+      }
+    }).catch(() => {
+      if (!cancelled) {
+        setRequestError('The report could not be refreshed. Showing the previous report when available.')
+        setReport((current) => {
+          if (current?.from === from && current.to === to) return current
+          return { from, to, days: [], items: [], error: 'Unable to load the report.' }
+        })
+      }
+    }).finally(() => {
+      if (!cancelled) setRefreshing(false)
     })
     return () => {
       cancelled = true
@@ -153,13 +174,13 @@ export default function Reports() {
   }
 
   const cards = [
-    { label: 'Total revenue', value: ready ? peso(totals.revenue) : '—' },
-    { label: 'Transactions', value: ready ? String(totals.transactions) : '—' },
+    { label: 'Total revenue', value: ready && !report?.error ? peso(totals.revenue) : '—' },
+    { label: 'Transactions', value: ready && !report?.error ? String(totals.transactions) : '—' },
     {
       label: 'Average order',
-      value: ready ? (totals.transactions > 0 ? peso(round2(totals.revenue / totals.transactions)) : '—') : '—',
+      value: ready && !report?.error ? (totals.transactions > 0 ? peso(round2(totals.revenue / totals.transactions)) : '—') : '—',
     },
-    { label: 'Items sold', value: ready ? String(totals.units) : '—' },
+    { label: 'Items sold', value: ready && !report?.error ? String(totals.units) : '—' },
   ]
 
   return (
@@ -207,13 +228,16 @@ export default function Reports() {
               <label htmlFor="to" className={label}>To</label>
               <input id="to" type="date" max={today} value={to} onChange={(e) => setTo(e.target.value)} className={field} />
             </div>
-            <button
-              type="button"
-              onClick={() => setTick((t) => t + 1)}
-              className="mb-3 text-xs font-bold tracking-wider text-brand-dark"
-            >
-              REFRESH
-            </button>
+            <RefreshButton
+              refreshing={refreshing}
+              onClick={() => {
+                setRequestError('')
+                if (report?.error) setReport(null)
+                setRefreshing(true)
+                setTick((t) => t + 1)
+              }}
+              className="mb-3"
+            />
           </div>
         </div>
 
@@ -222,14 +246,17 @@ export default function Reports() {
             {invalid}
           </p>
         )}
-        {report?.error && (
+        {ready && (requestError || report?.error) && (
           <p role="alert" className="text-sm text-red-700">
-            {report.error}
+            {requestError || 'The report could not be loaded. Please refresh and try again.'}
           </p>
         )}
+        {!ready && !invalid && <LoadingStatus label="Loading sales report…" />}
 
         <div className="grid grid-cols-4 gap-4">
-          {cards.map((c) => (
+          {!ready
+          ? cards.map((c) => <CardSkeleton key={c.label} />)
+          : cards.map((c) => (
             <div key={c.label} className={`${card} p-5`}>
               <div className="truncate text-[34px] font-extrabold leading-tight">{c.value}</div>
               <div className="mt-2 text-xs font-bold uppercase tracking-widest text-muted">{c.label}</div>
@@ -241,9 +268,23 @@ export default function Reports() {
           <div className={`${card} p-6`}>
             <b className="text-base">Daily sales</b>
             {!ready ? (
-              <p className="mt-4 text-muted">{invalid ? '' : 'Loading…'}</p>
+              invalid ? null : (
+                <div className="mt-4 overflow-x-auto">
+                  <div className="min-w-[560px]">
+                    <TableSkeleton
+                      label="Loading daily sales…"
+                      rows={5}
+                      columns={5}
+                      columnWidths={['1.5fr', '1fr', '0.8fr', '0.8fr', '1fr']}
+                    />
+                  </div>
+                </div>
+              )
+            ) : report?.error ? (
+              <StateMessage variant="error" title="Daily sales unavailable" description="Refresh the report to try again." />
             ) : (
-              <table className="mt-4 w-full border-collapse text-left">
+              <div className="content-enter mt-4 overflow-x-auto">
+              <table className="w-full min-w-[560px] border-collapse text-left">
                 <thead>
                   <tr className="text-muted">
                     {['Date', 'Transactions', 'Dine-in', 'Takeout', 'Revenue'].map((h, i) => (
@@ -280,16 +321,31 @@ export default function Reports() {
                   </tr>
                 </tfoot>
               </table>
+              </div>
             )}
           </div>
 
           <div className={`${card} p-6`}>
             <b className="text-base">Best sellers</b>
-            {ready && (report?.items.length ?? 0) === 0 && (
-              <p className="mt-4 text-muted">No sales in this period.</p>
-            )}
+            {!ready ? (
+              <div className="mt-4 overflow-x-auto">
+                <div className="min-w-[380px]">
+                  <TableSkeleton
+                    label="Loading best sellers…"
+                    rows={4}
+                    columns={3}
+                    columnWidths={['1.8fr', '0.7fr', '1fr']}
+                  />
+                </div>
+              </div>
+            ) : report?.error ? (
+              <StateMessage variant="error" title="Best sellers unavailable" description="Refresh the report to try again." />
+            ) : (report?.items.length ?? 0) === 0 ? (
+              <StateMessage title="No sales in this period" description="Best sellers will appear here after sales are recorded." />
+            ) : null}
             {ready && (report?.items.length ?? 0) > 0 && (
-              <table className="mt-4 w-full border-collapse text-left">
+              <div className="content-enter mt-4 overflow-x-auto">
+              <table className="w-full min-w-[380px] border-collapse text-left">
                 <thead>
                   <tr className="text-muted">
                     {['Item', 'Units', 'Revenue'].map((h, i) => (
@@ -321,6 +377,7 @@ export default function Reports() {
                   ))}
                 </tbody>
               </table>
+              </div>
             )}
           </div>
         </div>

@@ -12,6 +12,147 @@
   --color-muted: #5e6270;
 }
 
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: #e9edf2;
+}
+
+.skeleton::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent);
+  animation: kapos-shimmer 1.4s ease-in-out infinite;
+}
+
+.loading-ring,
+.login-spinner {
+  animation: kapos-spin 850ms linear infinite;
+}
+
+.refresh-button {
+  transition:
+    transform 160ms ease-out,
+    box-shadow 160ms ease-out,
+    background-color 160ms ease-out;
+}
+
+.refresh-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  background-color: #fff;
+  box-shadow: 0 6px 14px rgba(20, 20, 31, 0.12);
+}
+
+.refresh-button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(20, 20, 31, 0.08);
+}
+
+.login-button-state {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  animation: kapos-login-state-enter 180ms ease-out both;
+}
+
+.login-check path {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  animation: kapos-check-draw 320ms ease-out 60ms forwards;
+}
+
+.content-enter {
+  animation: kapos-content-enter 180ms ease-out both;
+}
+
+.modal-backdrop {
+  animation: kapos-fade-in 180ms ease-out both;
+}
+
+.modal-panel {
+  animation: kapos-modal-enter 200ms cubic-bezier(0.2, 0.75, 0.25, 1) both;
+}
+
+@keyframes kapos-shimmer {
+  to { transform: translateX(100%); }
+}
+
+@keyframes kapos-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes kapos-login-state-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.75);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes kapos-check-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes kapos-content-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes kapos-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes kapos-modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after,
+  .loading-ring,
+  .login-spinner,
+  .login-button-state,
+  .login-check path,
+  .content-enter,
+  .modal-backdrop,
+  .modal-panel,
+  .refresh-button {
+    animation: none !important;
+  }
+
+  .refresh-button {
+    transition: none;
+  }
+
+  .refresh-button:hover:not(:disabled),
+  .refresh-button:active:not(:disabled) {
+    transform: none;
+  }
+
+  .login-check path {
+    stroke-dashoffset: 0;
+  }
+}
+
 /* Login page: keep the dark look when the browser autofills a field */
 .login-input:-webkit-autofill,
 .login-input:-webkit-autofill:hover,

@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { supabase } from '../lib/supabase'
 
 // The photo fades into the dark background as it goes left
@@ -12,20 +12,53 @@ const fieldLabel = 'text-xs leading-none text-[#a5a8b8] group-focus-within:text-
 const fieldInput =
   'login-input mt-1 w-full bg-transparent text-[15px] font-semibold text-white outline-none placeholder:text-[#8d90a1]'
 
-export default function Login() {
+type LoginProps = {
+  onRequestStart: () => void
+  onRequestFailed: () => void
+  onSuccessAnimationComplete: () => void
+}
+
+export default function Login({ onRequestStart, onRequestFailed, onSuccessAnimationComplete }: LoginProps) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
-  const [busy, setBusy] = useState(false)
+  const [phase, setPhase] = useState<'idle' | 'loading' | 'success'>('idle')
+  const successTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(
+    () => () => {
+      if (successTimer.current) clearTimeout(successTimer.current)
+    },
+    []
+  )
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
-    setBusy(true)
+    if (phase !== 'idle') return
+    setPhase('loading')
     setError('')
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) setError(error.message)
-    setBusy(false)
+    onRequestStart()
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) {
+        setError(error.message)
+        setPhase('idle')
+        onRequestFailed()
+        return
+      }
+
+      setPhase('success')
+      const successDelay = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 100 : 650
+      successTimer.current = setTimeout(() => {
+        successTimer.current = null
+        onSuccessAnimationComplete()
+      }, successDelay)
+    } catch {
+      setError('We could not connect. Please check your connection and try again.')
+      setPhase('idle')
+      onRequestFailed()
+    }
   }
 
   return (
@@ -137,10 +170,26 @@ export default function Login() {
 
             <button
               type="submit"
-              disabled={busy}
-              className="mt-7 h-14 w-full rounded-full bg-brand text-base font-extrabold text-navy shadow-[0_10px_30px_rgba(255,118,33,0.4)] transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97] disabled:opacity-60"
+              disabled={phase !== 'idle'}
+              aria-busy={phase === 'loading'}
+              className="relative mt-7 flex h-14 w-full items-center justify-center overflow-hidden rounded-full bg-brand text-base font-extrabold text-navy shadow-[0_10px_30px_rgba(255,118,33,0.4)] transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97] disabled:opacity-60"
             >
-              {busy ? 'Signing in…' : 'Log in'}
+              {phase === 'idle' && <span className="login-button-label">Log in</span>}
+              {phase === 'loading' && (
+                <span aria-hidden="true" className="login-button-state">
+                  <span className="login-spinner h-5 w-5 rounded-full border-[3px] border-navy/20 border-t-navy" />
+                </span>
+              )}
+              {phase === 'success' && (
+                <span aria-hidden="true" className="login-button-state">
+                  <svg className="login-check h-6 w-6" viewBox="0 0 24 24" fill="none">
+                    <path d="m5 12.5 4.5 4.5L19 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+              )}
+              <span className="sr-only">
+                {phase === 'loading' ? 'Signing in…' : phase === 'success' ? 'Signed in' : 'Log in'}
+              </span>
             </button>
           </form>
         </main>
