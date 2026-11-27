@@ -70,30 +70,21 @@ export default function Login() {
               Need an account? <span className="font-semibold text-[#ff8a4c]">Ask your manager.</span>
             </p>
 
-          <div>
-            <label htmlFor="password" className={label}>Password</label>
-            <div className="relative">
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                required
-                autoComplete="current-password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`${field} pr-12`}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((s) => !s)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-xl transition-colors hover:bg-field active:bg-[#dce3ec]"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5e6270" strokeWidth="2" aria-hidden="true">
-                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
-                  <circle cx="12" cy="12" r="3" />
-                  {showPassword && <path d="M3 3l18 18" />}
-                </svg>
+            <div className="mt-9 flex flex-col gap-4">
+              <div className={fieldBox}>
+                <label htmlFor="email" className={fieldLabel}>
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  placeholder="name@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={fieldInput}
+                />
               </div>
 
               <div className={fieldBox}>
@@ -114,7 +105,7 @@ export default function Login() {
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  className="absolute right-1.5 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center"
+                  className="absolute right-1.5 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-xl transition-all hover:bg-white/10 active:bg-white/20 active:scale-95"
                 >
                   <svg
                     width="20"
@@ -137,27 +128,17 @@ export default function Login() {
               <input type="checkbox" className="h-5 w-5 accent-brand" />
               Remember me
             </label>
-            <button type="button" className="text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]">
-              FORGOT PASSWORD
-            </button>
-          </div>
 
-          {error && (
-            <p role="alert" className="text-sm text-red-700">{error}</p>
-          )}
-
-          <button
-            type="submit"
-            disabled={busy}
-            className="h-13 w-full rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97] disabled:opacity-60"
-          >
-            {busy ? 'Signing in…' : 'Log in'}
-          </button>
+            {error && (
+              <p role="alert" className="mt-4 text-sm text-[#ff8a8a]">
+                {error}
+              </p>
+            )}
 
             <button
               type="submit"
               disabled={busy}
-              className="mt-7 h-14 w-full rounded-full bg-brand text-base font-extrabold text-navy shadow-[0_10px_30px_rgba(255,118,33,0.4)] hover:brightness-95 disabled:opacity-60"
+              className="mt-7 h-14 w-full rounded-full bg-brand text-base font-extrabold text-navy shadow-[0_10px_30px_rgba(255,118,33,0.4)] transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97] disabled:opacity-60"
             >
               {busy ? 'Signing in…' : 'Log in'}
             </button>
