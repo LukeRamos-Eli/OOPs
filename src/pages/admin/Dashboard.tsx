@@ -279,8 +279,8 @@ export default function Dashboard() {
                 key={r.id}
                 type="button"
                 onClick={() => setRange(r.id)}
-                className={`h-11 rounded-full border px-5 text-sm font-semibold transition-all active:scale-[0.95] ${
-                  range === r.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5] active:bg-[#e3e7ee]'
+                className={`h-11 rounded-full border px-5 text-sm font-semibold ${
+                  range === r.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white'
                 }`}
               >
                 {r.label}
@@ -289,7 +289,7 @@ export default function Dashboard() {
             <button
               type="button"
               onClick={() => setTick((t) => t + 1)}
-              className="ml-2 text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]"
+              className="ml-2 text-xs font-bold tracking-wider text-brand-dark"
             >
               REFRESH
             </button>
@@ -346,7 +346,7 @@ export default function Dashboard() {
             <div className={`${card} p-6`}>
               <div className="flex items-center justify-between">
                 <b className="text-base">Low stock</b>
-                <Link to="/admin/inventory" className="text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]">
+                <Link to="/admin/inventory" className="text-xs font-bold tracking-wider text-brand-dark">
                   VIEW ALL
                 </Link>
               </div>

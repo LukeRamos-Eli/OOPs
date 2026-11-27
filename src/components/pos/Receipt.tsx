@@ -58,7 +58,7 @@ export default function Receipt({
         <button
           type="button"
           onClick={onNewOrder}
-          className="mt-4 h-13 w-full rounded-xl bg-brand font-sans text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97]"
+          className="mt-4 h-13 w-full rounded-xl bg-brand font-sans text-sm font-extrabold uppercase tracking-wider text-navy"
         >
           New order
         </button>
