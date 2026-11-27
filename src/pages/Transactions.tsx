@@ -195,8 +195,8 @@ export default function Transactions() {
                 key={p.id}
                 type="button"
                 onClick={() => changeRange(p.from, p.to)}
-                className={`h-11 rounded-full border px-5 text-sm font-semibold ${
-                  activePreset === p.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white'
+                className={`h-11 rounded-full border px-5 text-sm font-semibold transition-all active:scale-[0.95] ${
+                  activePreset === p.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5] active:bg-[#e3e7ee]'
                 }`}
               >
                 {p.label}
@@ -236,8 +236,8 @@ export default function Transactions() {
                   setStatus(s.id)
                   setLimit(100)
                 }}
-                className={`py-3 font-semibold ${
-                  status === s.id ? 'border-b-[3px] border-brand text-navy' : 'text-muted'
+                className={`py-3 font-semibold transition-colors ${
+                  status === s.id ? 'border-b-[3px] border-brand text-navy' : 'text-muted hover:text-navy'
                 }`}
               >
                 {s.label}
@@ -333,7 +333,7 @@ export default function Transactions() {
                         type="button"
                         onClick={() => setSelected(o)}
                         aria-label={`View order ${o.id}`}
-                        className="text-xs font-bold tracking-wider text-brand-dark"
+                        className="text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]"
                       >
                         VIEW
                       </button>
@@ -348,7 +348,7 @@ export default function Transactions() {
             <button
               type="button"
               onClick={() => setLimit((l) => l + 100)}
-              className="mt-5 h-11 rounded-full border border-[#d9dee7] px-6 text-sm font-semibold"
+              className="mt-5 h-11 rounded-full border border-[#d9dee7] px-6 text-sm font-semibold transition-all hover:bg-[#f0f2f5] active:bg-[#e3e7ee] active:scale-[0.97]"
             >
               Load more
             </button>
@@ -412,7 +412,7 @@ export default function Transactions() {
             <button
               type="button"
               onClick={() => setSelected(null)}
-              className="mt-4 h-13 w-full rounded-xl bg-brand font-sans text-sm font-extrabold uppercase tracking-wider text-navy"
+              className="mt-4 h-13 w-full rounded-xl bg-brand font-sans text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97]"
             >
               Close
             </button>

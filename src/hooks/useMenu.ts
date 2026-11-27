@@ -22,7 +22,7 @@ export function useMenu() {
         supabase.from('categories').select('id, name').order('name'),
         supabase
           .from('menu_items')
-          .select('id, category_id, name, description, price, is_available, categories(name)')
+          .select('id, category_id, name, description, price, is_available, image_path, categories(name)')
           .order('name'),
         supabase.from('menu_availability').select('menu_item_id, max_servings, can_order'),
       ])
@@ -53,6 +53,7 @@ export function useMenu() {
             description: row.description,
             price: Number(row.price),
             is_available: row.is_available,
+            image_path: row.image_path ?? null,
             category: cat?.name ?? null,
             max_servings: s?.max_servings ?? null,
             can_order: s?.can_order ?? row.is_available,

@@ -103,7 +103,7 @@ export default function Login({ onRequestStart, onRequestFailed, onSuccessAnimat
               Need an account? <span className="font-semibold text-[#ff8a4c]">Ask your manager.</span>
             </p>
 
-            <div className="mt-9 flex flex-col gap-[18px]">
+            <div className="mt-9 flex flex-col gap-4">
               <div className={fieldBox}>
                 <label htmlFor="email" className={fieldLabel}>
                   Email
@@ -118,19 +118,6 @@ export default function Login({ onRequestStart, onRequestFailed, onSuccessAnimat
                   onChange={(e) => setEmail(e.target.value)}
                   className={fieldInput}
                 />
-                <svg
-                  className="absolute right-5 top-1/2 -translate-y-1/2"
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#c9ccd6"
-                  strokeWidth="2"
-                  aria-hidden="true"
-                >
-                  <rect x="3" y="5" width="18" height="14" rx="2" />
-                  <path d="M3 7l9 6 9-6" />
-                </svg>
               </div>
 
               <div className={fieldBox}>
@@ -151,7 +138,7 @@ export default function Login({ onRequestStart, onRequestFailed, onSuccessAnimat
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  className="absolute right-1.5 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center"
+                  className="absolute right-1.5 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-xl transition-all hover:bg-white/10 active:bg-white/20 active:scale-95"
                 >
                   <svg
                     width="20"
@@ -176,7 +163,7 @@ export default function Login({ onRequestStart, onRequestFailed, onSuccessAnimat
             </label>
 
             {error && (
-              <p role="alert" className="mt-4 text-sm text-red-300">
+              <p role="alert" className="mt-4 text-sm text-[#ff8a8a]">
                 {error}
               </p>
             )}
@@ -185,7 +172,7 @@ export default function Login({ onRequestStart, onRequestFailed, onSuccessAnimat
               type="submit"
               disabled={phase !== 'idle'}
               aria-busy={phase === 'loading'}
-              className="relative mt-7 flex h-14 w-full items-center justify-center overflow-hidden rounded-full bg-brand text-base font-extrabold text-navy shadow-[0_10px_30px_rgba(255,118,33,0.4)] hover:brightness-95 disabled:opacity-60"
+              className="relative mt-7 flex h-14 w-full items-center justify-center overflow-hidden rounded-full bg-brand text-base font-extrabold text-navy shadow-[0_10px_30px_rgba(255,118,33,0.4)] transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97] disabled:opacity-60"
             >
               {phase === 'idle' && <span className="login-button-label">Log in</span>}
               {phase === 'loading' && (

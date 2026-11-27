@@ -186,7 +186,7 @@ export default function Users() {
               setError('')
               setNotice('')
             }}
-            className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy"
+            className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97]"
           >
             + Add account
           </button>
@@ -247,7 +247,7 @@ export default function Users() {
                 type="button"
                 onClick={create}
                 disabled={busy}
-                className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy disabled:opacity-60"
+                className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97] disabled:opacity-60"
               >
                 {busy ? 'Creating…' : 'Create account'}
               </button>
@@ -257,7 +257,7 @@ export default function Users() {
                   setShowForm(false)
                   setForm(emptyForm)
                 }}
-                className="h-13 rounded-xl border border-[#d9dee7] px-7 font-semibold"
+                className="h-13 rounded-xl border border-[#d9dee7] px-7 font-semibold transition-all hover:bg-[#f0f2f5] active:bg-[#e3e7ee] active:scale-[0.97]"
               >
                 Cancel
               </button>
@@ -358,7 +358,7 @@ export default function Users() {
                       <button
                         type="button"
                         onClick={() => openEdit(s)}
-                        className="text-xs font-bold tracking-wider text-brand-dark"
+                        className="text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]"
                       >
                         EDIT
                       </button>
@@ -367,7 +367,7 @@ export default function Users() {
                           type="button"
                           onClick={() => toggleActive(s)}
                           disabled={busy}
-                          className="text-xs font-bold tracking-wider text-red-700"
+                          className="text-xs font-bold tracking-wider text-red-700 transition-colors hover:text-red-900 active:text-red-950"
                         >
                           {s.active ? 'DEACTIVATE' : 'REACTIVATE'}
                         </button>
@@ -427,7 +427,7 @@ export default function Users() {
                 type="button"
                 onClick={() => setEditing(null)}
                 disabled={busy}
-                className="h-13 flex-1 rounded-xl border border-[#d9dee7] font-semibold"
+                className="h-13 flex-1 rounded-xl border border-[#d9dee7] font-semibold transition-all hover:bg-[#f0f2f5] active:bg-[#e3e7ee] active:scale-[0.97]"
               >
                 Cancel
               </button>
@@ -435,7 +435,7 @@ export default function Users() {
                 type="button"
                 onClick={saveEdit}
                 disabled={busy}
-                className="h-13 flex-1 rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy disabled:opacity-60"
+                className="h-13 flex-1 rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97] disabled:opacity-60"
               >
                 {busy ? 'Saving…' : 'Save'}
               </button>
