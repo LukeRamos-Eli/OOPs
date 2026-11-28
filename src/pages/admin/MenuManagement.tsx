@@ -317,9 +317,9 @@ export default function MenuManagement() {
 
   return (
     <Layout>
-      <div className="grid grid-cols-[1fr_400px] gap-6 p-8">
+      <div className="flex flex-col gap-6 p-4 sm:p-6 lg:grid lg:grid-cols-[1fr_380px] lg:p-8 xl:grid-cols-[1fr_400px]">
         <section className="flex flex-col gap-5">
-          <header className="flex items-center justify-between">
+          <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl font-extrabold">Menu</h1>
               <p className="mt-1 text-muted">Total {String(rows.length).padStart(2, '0')} items</p>
@@ -328,22 +328,24 @@ export default function MenuManagement() {
               type="button"
               onClick={() => {
                 reset()
-                document.getElementById('name')?.focus()
+                const el = document.getElementById('name')
+                el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                el?.focus()
               }}
-              className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy"
+              className="h-12 w-full rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:scale-[0.97] sm:h-13 sm:w-auto"
             >
               + Add item
             </button>
           </header>
 
-          <div className="flex flex-wrap gap-8 border-b border-[#e3e7ee]">
+          <div className="flex gap-6 overflow-x-auto border-b border-[#e3e7ee] sm:gap-8">
             {[{ id: 'all' as const, name: 'All' }, ...categories].map((c) => (
               <button
                 key={c.id}
                 type="button"
                 onClick={() => setTab(c.id)}
-                className={`py-3 font-semibold ${
-                  tab === c.id ? 'border-b-[3px] border-brand text-navy' : 'text-muted'
+                className={`whitespace-nowrap py-3 font-semibold transition-colors ${
+                  tab === c.id ? 'border-b-[3px] border-brand text-navy' : 'text-muted hover:text-navy'
                 }`}
               >
                 {c.name}
@@ -353,7 +355,7 @@ export default function MenuManagement() {
 
           {notice && <p role="status" className="content-enter text-sm text-[#17663a]">{notice}</p>}
 
-          <div className={`${card} px-6 py-2`}>
+          <div className={`${card} px-4 py-2 sm:px-6`}>
             {refreshing && <LoadingStatus label="Refreshing menu…" className="py-3" />}
             {loading ? (
               <div className="space-y-4 py-4">
@@ -388,7 +390,7 @@ export default function MenuManagement() {
             ) : visible.map((row) => (
               <div
                 key={row.id}
-                className="content-enter flex items-center gap-4 border-b border-[#eef1f5] py-4 last:border-0"
+                className="content-enter flex flex-wrap items-center gap-3 border-b border-[#eef1f5] py-4 last:border-0 sm:gap-4"
               >
                 {row.image_path ? (
                   <img
@@ -402,9 +404,9 @@ export default function MenuManagement() {
                     {row.name.slice(0, 2)}
                   </div>
                 )}
-                <div className="flex-1">
+                <div className="min-w-[140px] flex-1">
                   <b>{row.name}</b>
-                  <div className="mt-1.5 flex items-center gap-2">
+                  <div className="mt-1.5 flex flex-wrap items-center gap-2">
                     {row.categories && (
                       <span className="rounded-xl bg-peach px-3 py-1 text-xs font-bold text-[#b23b06]">
                         {row.categories.name}
@@ -420,36 +422,38 @@ export default function MenuManagement() {
                   onClick={() => toggleAvailable(row)}
                   disabled={pendingItemId === row.id}
                   aria-label={`Toggle availability of ${row.name}`}
-                  className={`rounded-xl px-3 py-1 text-xs font-bold ${
+                  className={`rounded-xl px-3 py-1 text-xs font-bold transition-all active:scale-95 ${
                     row.is_available ? 'bg-[#e3f5ea] text-[#17663a]' : 'bg-[#e7eaf0] text-[#3f4350]'
                   }`}
                 >
                   {row.is_available ? 'Available' : 'Unavailable'}
                 </button>
                 <b className="w-20 text-right">{peso(Number(row.price))}</b>
-                <button
-                  type="button"
-                  onClick={() => startEdit(row)}
-                  disabled={pendingItemId === row.id}
-                  className="text-xs font-bold tracking-wider text-brand-dark"
-                >
-                  EDIT
-                </button>
-                <button
-                  type="button"
-                  onClick={() => remove(row)}
-                  disabled={pendingItemId === row.id}
-                  className="text-xs font-bold tracking-wider text-red-700"
-                >
-                  DELETE
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => startEdit(row)}
+                    disabled={pendingItemId === row.id}
+                    className="text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412]"
+                  >
+                    EDIT
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => remove(row)}
+                    disabled={pendingItemId === row.id}
+                    className="text-xs font-bold tracking-wider text-red-700 transition-colors hover:text-red-900"
+                  >
+                    DELETE
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         </section>
 
         <aside
-          className={`${card} sticky top-8 flex max-h-[calc(100vh-4rem)] flex-col gap-3 self-start overflow-y-auto p-5`}
+          className={`${card} flex flex-col gap-3 p-5 lg:sticky lg:top-8 lg:max-h-[calc(100vh-4rem)] lg:self-start lg:overflow-y-auto`}
         >
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-extrabold">{editingId ? 'Edit Item' : 'Add New Item'}</h2>
@@ -514,7 +518,7 @@ export default function MenuManagement() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label htmlFor="price" className={label}>Price (₱)</label>
               <input
@@ -582,7 +586,7 @@ export default function MenuManagement() {
           </div>
 
           {Object.keys(recipe).length > 0 && (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {ingredients
                 .filter((ing) => ing.id in recipe)
                 .map((ing) => (
