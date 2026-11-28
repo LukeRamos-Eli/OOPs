@@ -127,8 +127,8 @@ export default function Inventory() {
 
   return (
     <Layout>
-      <div className="flex flex-col gap-5 p-8">
-        <header className="flex items-center justify-between">
+      <div className="flex flex-col gap-5 p-4 sm:p-6 lg:p-8">
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-extrabold">Inventory</h1>
             <p className="mt-1 text-muted">
@@ -138,7 +138,7 @@ export default function Inventory() {
           <button
             type="button"
             onClick={openNew}
-            className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy"
+            className="h-12 w-full rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:scale-[0.97] sm:h-13 sm:w-auto"
           >
             + Add ingredient
           </button>
@@ -146,11 +146,11 @@ export default function Inventory() {
         {notice && <p role="status" className="content-enter text-sm text-[#17663a]">{notice}</p>}
 
         {showForm && (
-          <div className={`${card} flex flex-col gap-4 p-6`}>
+          <div className={`${card} flex flex-col gap-4 p-4 sm:p-6`}>
             <h2 className="text-lg font-extrabold">
               {editingId ? 'Edit ingredient' : 'New ingredient'}
             </h2>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
                 <label htmlFor="iname" className={label}>Name</label>
                 <input
@@ -237,14 +237,14 @@ export default function Inventory() {
           </div>
         )}
 
-        <div className="flex gap-8 border-b border-[#e3e7ee]">
+        <div className="flex gap-6 overflow-x-auto border-b border-[#e3e7ee] sm:gap-8">
           {tabs.map((t) => (
             <button
               key={t}
               type="button"
               onClick={() => setTab(t)}
-              className={`py-3 font-semibold ${
-                tab === t ? 'border-b-[3px] border-brand text-navy' : 'text-muted'
+              className={`whitespace-nowrap py-3 font-semibold transition-colors ${
+                tab === t ? 'border-b-[3px] border-brand text-navy' : 'text-muted hover:text-navy'
               }`}
             >
               {t}
@@ -252,7 +252,7 @@ export default function Inventory() {
           ))}
         </div>
 
-        <div className={`${card} p-6`}>
+        <div className={`${card} p-4 sm:p-6`}>
           {refreshing && <LoadingStatus label="Refreshing inventory…" className="mb-4" />}
           {loading ? (
             <div className="overflow-x-auto">
