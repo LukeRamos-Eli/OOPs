@@ -174,7 +174,11 @@ export default function Reports() {
             type="button"
             onClick={exportCsv}
             disabled={!ready || !!report?.error}
+<<<<<<< HEAD
             className="h-12 w-full rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:scale-[0.97] disabled:opacity-40 sm:h-13 sm:w-auto"
+=======
+            className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97] disabled:opacity-40"
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
           >
             Export CSV
           </button>
@@ -190,8 +194,13 @@ export default function Reports() {
                   setFrom(p.from)
                   setTo(p.to)
                 }}
+<<<<<<< HEAD
                 className={`h-11 rounded-full border px-4 text-sm font-semibold transition-all active:scale-[0.96] sm:px-5 ${
                   activePreset === p.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5]'
+=======
+                className={`h-11 rounded-full border px-5 text-sm font-semibold transition-all active:scale-[0.95] ${
+                  activePreset === p.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5] active:bg-[#e3e7ee]'
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
                 }`}
               >
                 {p.label}
@@ -210,7 +219,11 @@ export default function Reports() {
             <button
               type="button"
               onClick={() => setTick((t) => t + 1)}
+<<<<<<< HEAD
               className="mb-3 text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412]"
+=======
+              className="mb-3 text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]"
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
             >
               REFRESH
             </button>

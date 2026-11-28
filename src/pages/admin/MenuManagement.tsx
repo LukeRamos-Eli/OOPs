@@ -212,7 +212,11 @@ export default function MenuManagement() {
                 el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
                 el?.focus()
               }}
+<<<<<<< HEAD
               className="h-12 w-full rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:scale-[0.97] sm:h-13 sm:w-auto"
+=======
+              className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97]"
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
             >
               + Add item
             </button>
@@ -224,7 +228,11 @@ export default function MenuManagement() {
                 key={c.id}
                 type="button"
                 onClick={() => setTab(c.id)}
+<<<<<<< HEAD
                 className={`whitespace-nowrap py-3 font-semibold transition-colors ${
+=======
+                className={`py-3 font-semibold transition-colors ${
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
                   tab === c.id ? 'border-b-[3px] border-brand text-navy' : 'text-muted hover:text-navy'
                 }`}
               >
@@ -259,13 +267,18 @@ export default function MenuManagement() {
                   type="button"
                   onClick={() => toggleAvailable(row)}
                   aria-label={`Toggle availability of ${row.name}`}
+<<<<<<< HEAD
                   className={`rounded-xl px-3 py-1 text-xs font-bold transition-all active:scale-95 ${
+=======
+                  className={`rounded-xl px-3 py-1 text-xs font-bold transition-colors hover:brightness-90 ${
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
                     row.is_available ? 'bg-[#e3f5ea] text-[#17663a]' : 'bg-[#e7eaf0] text-[#3f4350]'
                   }`}
                 >
                   {row.is_available ? 'Available' : 'Unavailable'}
                 </button>
                 <b className="w-20 text-right">{peso(Number(row.price))}</b>
+<<<<<<< HEAD
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
@@ -282,6 +295,22 @@ export default function MenuManagement() {
                     DELETE
                   </button>
                 </div>
+=======
+                <button
+                  type="button"
+                  onClick={() => startEdit(row)}
+                  className="text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]"
+                >
+                  EDIT
+                </button>
+                <button
+                  type="button"
+                  onClick={() => remove(row)}
+                  className="text-xs font-bold tracking-wider text-red-700 transition-colors hover:text-red-900 active:text-red-950"
+                >
+                  DELETE
+                </button>
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
               </div>
             ))}
           </div>
@@ -295,7 +324,7 @@ export default function MenuManagement() {
             <button
               type="button"
               onClick={reset}
-              className="text-xs font-bold tracking-wider text-brand-dark"
+              className="text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]"
             >
               RESET
             </button>
@@ -358,13 +387,13 @@ export default function MenuManagement() {
                       type="button"
                       aria-pressed={selected}
                       onClick={() => toggleIngredient(ing.id)}
-                      className="flex w-16 flex-col items-center gap-1 text-[11px] text-muted"
+                      className="flex w-16 flex-col items-center gap-1 text-[11px] text-muted transition-transform active:scale-90"
                     >
                       <span
-                        className={`flex h-10 w-10 items-center justify-center rounded-full text-[13px] font-extrabold ${
+                        className={`flex h-10 w-10 items-center justify-center rounded-full text-[13px] font-extrabold transition-all ${
                           selected
                             ? 'border-2 border-brand bg-peach text-[#b23b06]'
-                            : 'border border-[#d9dee7] bg-white text-muted'
+                            : 'border border-[#d9dee7] bg-white text-muted hover:border-brand/50 hover:bg-peach/50'
                         }`}
                       >
                         {ing.name.slice(0, 2)}
@@ -432,7 +461,7 @@ export default function MenuManagement() {
             type="button"
             onClick={save}
             disabled={busy}
-            className="h-13 rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy disabled:opacity-60"
+            className="h-13 rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97] disabled:opacity-60"
           >
             {busy ? 'Saving…' : 'Save changes'}
           </button>

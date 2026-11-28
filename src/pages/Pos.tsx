@@ -117,8 +117,13 @@ export default function Pos() {
                 key={c.id}
                 type="button"
                 onClick={() => setActive(c.id)}
+<<<<<<< HEAD
                 className={`h-11 shrink-0 rounded-full border px-5 text-sm font-semibold transition-all active:scale-[0.96] ${
                   active === c.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5]'
+=======
+                className={`h-11 rounded-full border px-5 text-sm font-semibold transition-all active:scale-[0.95] ${
+                  active === c.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5] active:bg-[#e3e7ee]'
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
                 }`}
               >
                 {c.name}
@@ -140,7 +145,11 @@ export default function Pos() {
                 disabled={!item.can_order}
                 onClick={() => warn(item, add(item))}
                 className={`${card} flex flex-col gap-2 p-4 text-left transition-all ${
+<<<<<<< HEAD
                   item.can_order ? 'hover:ring-2 hover:ring-brand active:scale-[0.98]' : 'opacity-60'
+=======
+                  item.can_order ? 'hover:ring-2 hover:ring-brand hover:shadow-lg active:scale-[0.97] active:ring-brand-dark' : 'opacity-60'
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
                 }`}
               >
                 <div className="flex flex-wrap items-center gap-2">
@@ -180,6 +189,7 @@ export default function Pos() {
         >
           <div className="flex items-center justify-between px-6">
             <h2 className="text-lg font-extrabold">Current order</h2>
+<<<<<<< HEAD
             <div className="flex items-center gap-4">
               <button
                 type="button"
@@ -199,6 +209,18 @@ export default function Pos() {
                 CLOSE
               </button>
             </div>
+=======
+            <button
+              type="button"
+              onClick={() => {
+                clear()
+                setNotice('')
+              }}
+              className="text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]"
+            >
+              CLEAR
+            </button>
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
           </div>
 
           <div className="flex gap-2 px-6">
@@ -207,8 +229,13 @@ export default function Pos() {
                 key={value}
                 type="button"
                 onClick={() => setOrderType(value)}
+<<<<<<< HEAD
                 className={`h-11 flex-1 rounded-full border text-sm font-semibold transition-all active:scale-[0.97] ${
                   orderType === value ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5]'
+=======
+                className={`h-11 flex-1 rounded-full border text-sm font-semibold transition-all active:scale-[0.95] ${
+                  orderType === value ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5] active:bg-[#e3e7ee]'
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
                 }`}
               >
                 {label}
@@ -235,7 +262,11 @@ export default function Pos() {
                     type="button"
                     aria-label={`Decrease ${l.item.name}`}
                     onClick={() => setQty(l.item.id, l.qty - 1)}
+<<<<<<< HEAD
                     className="h-10 w-10 rounded-full bg-[#32343e] transition-colors hover:bg-[#454856] active:scale-95"
+=======
+                    className="h-10 w-10 rounded-full bg-[#32343e] transition-colors hover:bg-[#484a55] active:bg-[#25272e]"
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
                   >
                     −
                   </button>
@@ -244,7 +275,11 @@ export default function Pos() {
                     type="button"
                     aria-label={`Increase ${l.item.name}`}
                     onClick={() => warn(l.item, setQty(l.item.id, l.qty + 1))}
+<<<<<<< HEAD
                     className="h-10 w-10 rounded-full bg-[#32343e] transition-colors hover:bg-[#454856] active:scale-95"
+=======
+                    className="h-10 w-10 rounded-full bg-[#32343e] transition-colors hover:bg-[#484a55] active:bg-[#25272e]"
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
                   >
                     +
                   </button>
@@ -265,7 +300,11 @@ export default function Pos() {
                 setPayError('')
                 setShowPayment(true)
               }}
+<<<<<<< HEAD
               className="h-13 rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-40"
+=======
+              className="h-13 rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97] disabled:opacity-40"
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
             >
               Charge
             </button>

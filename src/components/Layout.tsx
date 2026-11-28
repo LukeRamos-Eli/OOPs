@@ -15,7 +15,11 @@ const nav = [
 
 const base = 'block w-full rounded-2xl px-4 py-3.5 text-left font-semibold transition-all active:scale-[0.98]'
 const on = 'bg-brand text-navy'
+<<<<<<< HEAD
 const off = 'text-[#c9ccd6] hover:bg-white/10 active:bg-white/15'
+=======
+const off = 'text-[#c9ccd6] transition-colors hover:bg-white/10 active:bg-white/20'
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
 
 export default function Layout({ children }: { children: ReactNode }) {
   const { session, role } = useAuth()
@@ -99,7 +103,11 @@ export default function Layout({ children }: { children: ReactNode }) {
           <button
             type="button"
             onClick={() => supabase.auth.signOut()}
+<<<<<<< HEAD
             className="h-11 rounded-xl border border-white/20 text-sm font-semibold transition-all hover:bg-white/10 active:scale-[0.98]"
+=======
+            className="h-11 rounded-xl border border-white/20 text-sm font-semibold transition-all hover:bg-white/10 active:bg-white/20 active:scale-[0.97]"
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
           >
             Log out
           </button>
