@@ -213,7 +213,11 @@ export default function MenuManagement() {
                 el?.focus()
               }}
 <<<<<<< HEAD
+<<<<<<< HEAD
               className="h-12 w-full rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:scale-[0.97] sm:h-13 sm:w-auto"
+=======
+              className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97]"
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
 =======
               className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97]"
 >>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
@@ -229,7 +233,11 @@ export default function MenuManagement() {
                 type="button"
                 onClick={() => setTab(c.id)}
 <<<<<<< HEAD
+<<<<<<< HEAD
                 className={`whitespace-nowrap py-3 font-semibold transition-colors ${
+=======
+                className={`py-3 font-semibold transition-colors ${
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
 =======
                 className={`py-3 font-semibold transition-colors ${
 >>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
@@ -268,7 +276,11 @@ export default function MenuManagement() {
                   onClick={() => toggleAvailable(row)}
                   aria-label={`Toggle availability of ${row.name}`}
 <<<<<<< HEAD
+<<<<<<< HEAD
                   className={`rounded-xl px-3 py-1 text-xs font-bold transition-all active:scale-95 ${
+=======
+                  className={`rounded-xl px-3 py-1 text-xs font-bold transition-colors hover:brightness-90 ${
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
 =======
                   className={`rounded-xl px-3 py-1 text-xs font-bold transition-colors hover:brightness-90 ${
 >>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)

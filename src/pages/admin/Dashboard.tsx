@@ -280,8 +280,13 @@ export default function Dashboard() {
                 type="button"
                 onClick={() => setRange(r.id)}
 <<<<<<< HEAD
+<<<<<<< HEAD
                 className={`h-11 rounded-full border px-4 text-sm font-semibold transition-all active:scale-[0.96] sm:px-5 ${
                   range === r.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5]'
+=======
+                className={`h-11 rounded-full border px-5 text-sm font-semibold transition-all active:scale-[0.95] ${
+                  range === r.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5] active:bg-[#e3e7ee]'
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
 =======
                 className={`h-11 rounded-full border px-5 text-sm font-semibold transition-all active:scale-[0.95] ${
                   range === r.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5] active:bg-[#e3e7ee]'
@@ -295,7 +300,11 @@ export default function Dashboard() {
               type="button"
               onClick={() => setTick((t) => t + 1)}
 <<<<<<< HEAD
+<<<<<<< HEAD
               className="ml-auto text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] sm:ml-2"
+=======
+              className="ml-2 text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]"
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
 =======
               className="ml-2 text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] active:text-[#7c2d12]"
 >>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)

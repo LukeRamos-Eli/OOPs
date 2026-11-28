@@ -114,7 +114,11 @@ export default function Inventory() {
             type="button"
             onClick={openNew}
 <<<<<<< HEAD
+<<<<<<< HEAD
             className="h-12 w-full rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:scale-[0.97] sm:h-13 sm:w-auto"
+=======
+            className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97]"
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
 =======
             className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97]"
 >>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
@@ -222,7 +226,11 @@ export default function Inventory() {
               type="button"
               onClick={() => setTab(t)}
 <<<<<<< HEAD
+<<<<<<< HEAD
               className={`whitespace-nowrap py-3 font-semibold transition-colors ${
+=======
+              className={`py-3 font-semibold transition-colors ${
+>>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
 =======
               className={`py-3 font-semibold transition-colors ${
 >>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
