@@ -164,8 +164,8 @@ export default function Reports() {
 
   return (
     <Layout>
-      <div className="flex flex-col gap-5 p-8">
-        <header className="flex items-center justify-between">
+      <div className="flex flex-col gap-5 p-4 sm:p-6 lg:p-8">
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-extrabold">Reports</h1>
             <p className="mt-1 text-muted">Daily sales report</p>
@@ -174,13 +174,13 @@ export default function Reports() {
             type="button"
             onClick={exportCsv}
             disabled={!ready || !!report?.error}
-            className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy disabled:opacity-40"
+            className="h-12 w-full rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:scale-[0.97] disabled:opacity-40 sm:h-13 sm:w-auto"
           >
             Export CSV
           </button>
         </header>
 
-        <div className={`${card} flex flex-wrap items-end gap-4 p-5`}>
+        <div className={`${card} flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:flex-wrap lg:items-end`}>
           <div className="flex flex-wrap gap-2">
             {presets(today).map((p) => (
               <button
@@ -190,27 +190,27 @@ export default function Reports() {
                   setFrom(p.from)
                   setTo(p.to)
                 }}
-                className={`h-11 rounded-full border px-5 text-sm font-semibold ${
-                  activePreset === p.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white'
+                className={`h-11 rounded-full border px-4 text-sm font-semibold transition-all active:scale-[0.96] sm:px-5 ${
+                  activePreset === p.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5]'
                 }`}
               >
                 {p.label}
               </button>
             ))}
           </div>
-          <div className="ml-auto flex items-end gap-3">
-            <div>
+          <div className="flex flex-wrap items-end gap-3 lg:ml-auto">
+            <div className="min-w-[130px] flex-1 sm:flex-initial">
               <label htmlFor="from" className={label}>From</label>
-              <input id="from" type="date" max={today} value={from} onChange={(e) => setFrom(e.target.value)} className={field} />
+              <input id="from" type="date" max={today} value={from} onChange={(e) => setFrom(e.target.value)} className={`${field} w-full sm:w-auto`} />
             </div>
-            <div>
+            <div className="min-w-[130px] flex-1 sm:flex-initial">
               <label htmlFor="to" className={label}>To</label>
-              <input id="to" type="date" max={today} value={to} onChange={(e) => setTo(e.target.value)} className={field} />
+              <input id="to" type="date" max={today} value={to} onChange={(e) => setTo(e.target.value)} className={`${field} w-full sm:w-auto`} />
             </div>
             <button
               type="button"
               onClick={() => setTick((t) => t + 1)}
-              className="mb-3 text-xs font-bold tracking-wider text-brand-dark"
+              className="mb-3 text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412]"
             >
               REFRESH
             </button>
@@ -228,22 +228,23 @@ export default function Reports() {
           </p>
         )}
 
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {cards.map((c) => (
-            <div key={c.label} className={`${card} p-5`}>
-              <div className="truncate text-[34px] font-extrabold leading-tight">{c.value}</div>
+            <div key={c.label} className={`${card} p-4 sm:p-5`}>
+              <div className="truncate text-2xl font-extrabold leading-tight sm:text-[34px]">{c.value}</div>
               <div className="mt-2 text-xs font-bold uppercase tracking-widest text-muted">{c.label}</div>
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-[1.4fr_1fr] items-start gap-5">
-          <div className={`${card} p-6`}>
+        <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[1.4fr_1fr]">
+          <div className={`${card} p-4 sm:p-6`}>
             <b className="text-base">Daily sales</b>
             {!ready ? (
               <p className="mt-4 text-muted">{invalid ? '' : 'Loading…'}</p>
             ) : (
-              <table className="mt-4 w-full border-collapse text-left">
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full min-w-[460px] border-collapse text-left">
                 <thead>
                   <tr className="text-muted">
                     {['Date', 'Transactions', 'Dine-in', 'Takeout', 'Revenue'].map((h, i) => (
@@ -279,17 +280,19 @@ export default function Reports() {
                     <td className="pt-4 text-right">{peso(totals.revenue)}</td>
                   </tr>
                 </tfoot>
-              </table>
+                </table>
+              </div>
             )}
           </div>
 
-          <div className={`${card} p-6`}>
+          <div className={`${card} p-4 sm:p-6`}>
             <b className="text-base">Best sellers</b>
             {ready && (report?.items.length ?? 0) === 0 && (
               <p className="mt-4 text-muted">No sales in this period.</p>
             )}
             {ready && (report?.items.length ?? 0) > 0 && (
-              <table className="mt-4 w-full border-collapse text-left">
+              <div className="mt-4 overflow-x-auto">
+                <table className="w-full min-w-[300px] border-collapse text-left">
                 <thead>
                   <tr className="text-muted">
                     {['Item', 'Units', 'Revenue'].map((h, i) => (
@@ -320,7 +323,8 @@ export default function Reports() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+                </table>
+              </div>
             )}
           </div>
         </div>

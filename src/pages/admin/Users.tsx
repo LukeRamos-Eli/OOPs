@@ -134,8 +134,8 @@ export default function Users() {
 
   return (
     <Layout>
-      <div className="flex flex-col gap-5 p-8">
-        <header className="flex items-center justify-between">
+      <div className="flex flex-col gap-5 p-4 sm:p-6 lg:p-8">
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-extrabold">Users</h1>
             <p className="mt-1 text-muted">
@@ -149,16 +149,16 @@ export default function Users() {
               setError('')
               setNotice('')
             }}
-            className="h-13 rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:brightness-90 active:scale-[0.97]"
+            className="h-12 w-full rounded-xl bg-brand px-7 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:scale-[0.97] active:brightness-90 sm:h-13 sm:w-auto"
           >
             + Add account
           </button>
         </header>
 
         {showForm && (
-          <div className={`${card} flex flex-col gap-4 p-6`}>
+          <div className={`${card} flex flex-col gap-4 p-4 sm:p-6`}>
             <h2 className="text-lg font-extrabold">New account</h2>
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div>
                 <label htmlFor="uname" className={label}>Name</label>
                 <input
@@ -239,11 +239,12 @@ export default function Users() {
           </p>
         )}
 
-        <div className={`${card} p-6`}>
+        <div className={`${card} p-4 sm:p-6`}>
           {!loaded ? (
             <p className="text-muted">{error ? '' : 'Loading…'}</p>
           ) : (
-            <table className="w-full border-collapse text-left">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[600px] border-collapse text-left">
               <thead>
                 <tr className="text-muted">
                   {['Account', 'Role', 'Status', 'Last sign-in', ''].map((h) => (
@@ -309,7 +310,8 @@ export default function Users() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+              </table>
+            </div>
           )}
         </div>
       </div>

@@ -156,7 +156,7 @@ export default function Transactions() {
 
   return (
     <Layout>
-      <div className="flex flex-col gap-5 p-8">
+      <div className="flex flex-col gap-5 p-4 sm:p-6 lg:p-8">
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-extrabold">Transactions</h1>
@@ -171,14 +171,14 @@ export default function Transactions() {
           </button>
         </header>
 
-        <div className={`${card} flex flex-wrap items-end gap-4 p-5`}>
+        <div className={`${card} flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:flex-wrap lg:items-end`}>
           <div className="flex flex-wrap gap-2">
             {presets.map((p) => (
               <button
                 key={p.id}
                 type="button"
                 onClick={() => changeRange(p.from, p.to)}
-                className={`h-11 rounded-full border px-5 text-sm font-semibold transition-all active:scale-[0.95] ${
+                className={`h-11 rounded-full border px-4 text-sm font-semibold transition-all active:scale-[0.95] sm:px-5 ${
                   activePreset === p.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5] active:bg-[#e3e7ee]'
                 }`}
               >
@@ -186,16 +186,16 @@ export default function Transactions() {
               </button>
             ))}
           </div>
-          <div className="ml-auto flex items-end gap-3">
-            <div>
+          <div className="flex flex-wrap items-end gap-3 lg:ml-auto">
+            <div className="min-w-[130px] flex-1 sm:flex-initial">
               <label htmlFor="tfrom" className={label}>From</label>
-              <input id="tfrom" type="date" max={today} value={from} onChange={(e) => changeRange(e.target.value, to)} className={field} />
+              <input id="tfrom" type="date" max={today} value={from} onChange={(e) => changeRange(e.target.value, to)} className={`${field} w-full sm:w-auto`} />
             </div>
-            <div>
+            <div className="min-w-[130px] flex-1 sm:flex-initial">
               <label htmlFor="tto" className={label}>To</label>
-              <input id="tto" type="date" max={today} value={to} onChange={(e) => changeRange(from, e.target.value)} className={field} />
+              <input id="tto" type="date" max={today} value={to} onChange={(e) => changeRange(from, e.target.value)} className={`${field} w-full sm:w-auto`} />
             </div>
-            <div>
+            <div className="w-28">
               <label htmlFor="tsearch" className={label}>Order #</label>
               <input
                 id="tsearch"
@@ -203,14 +203,14 @@ export default function Transactions() {
                 placeholder="e.g. 12"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className={`${field} w-28 placeholder:text-[#6b6e7c]`}
+                className={`${field} w-full placeholder:text-[#6b6e7c]`}
               />
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between border-b border-[#e3e7ee]">
-          <div className="flex gap-8">
+        <div className="flex flex-col gap-2 border-b border-[#e3e7ee] pb-2 sm:flex-row sm:items-center sm:justify-between sm:pb-0">
+          <div className="flex gap-6 overflow-x-auto sm:gap-8">
             {statuses.map((s) => (
               <button
                 key={s.id}
@@ -219,7 +219,7 @@ export default function Transactions() {
                   setStatus(s.id)
                   setLimit(100)
                 }}
-                className={`py-3 font-semibold transition-colors ${
+                className={`whitespace-nowrap py-3 font-semibold transition-colors ${
                   status === s.id ? 'border-b-[3px] border-brand text-navy' : 'text-muted hover:text-navy'
                 }`}
               >
@@ -246,13 +246,14 @@ export default function Transactions() {
           </p>
         )}
 
-        <div className={`${card} p-6`}>
+        <div className={`${card} p-4 sm:p-6`}>
           {!ready ? (
             <p className="text-muted">{invalid ? '' : 'Loading…'}</p>
           ) : shown.length === 0 ? (
             <p className="text-muted">No transactions found for these filters.</p>
           ) : (
-            <table className="w-full border-collapse text-left">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[640px] border-collapse text-left">
               <thead>
                 <tr className="text-muted">
                   {['Order', 'Date & time', 'Type', ...(isAdmin ? ['Cashier'] : []), 'Items', 'Total', 'Status', ''].map(
@@ -296,7 +297,8 @@ export default function Transactions() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+              </table>
+            </div>
           )}
           {hasMore && (
             <button

@@ -29,6 +29,9 @@ export default function Pos() {
   const [payError, setPayError] = useState('')
   const [notice, setNotice] = useState('')
   const [receipt, setReceipt] = useState<ReceiptData | null>(null)
+  const [cartOpen, setCartOpen] = useState(false)
+
+  const itemCount = useMemo(() => lines.reduce((s, l) => s + l.qty, 0), [lines])
 
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -91,9 +94,9 @@ export default function Pos() {
 
   return (
     <Layout>
-      <div className="grid grid-cols-[1fr_380px] gap-6 p-8">
+      <div className="flex flex-col gap-5 p-4 pb-24 sm:p-6 sm:pb-24 lg:grid lg:grid-cols-[1fr_360px] lg:gap-6 lg:p-8 lg:pb-8 xl:grid-cols-[1fr_380px]">
         <section className="flex flex-col gap-5">
-          <header className="flex items-center justify-between">
+          <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl font-extrabold">New order</h1>
               <p className="mt-1 text-muted">Tap an item to add it</p>
@@ -104,18 +107,18 @@ export default function Pos() {
               aria-label="Search menu"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-13 w-64 rounded-xl bg-field px-4 text-sm outline-none placeholder:text-[#6b6e7c] focus:ring-2 focus:ring-brand"
+              className="h-12 w-full rounded-xl bg-field px-4 text-sm outline-none placeholder:text-[#6b6e7c] focus:ring-2 focus:ring-brand sm:h-13 sm:w-64"
             />
           </header>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible sm:pb-0">
             {[{ id: 'all' as const, name: 'All' }, ...categories].map((c) => (
               <button
                 key={c.id}
                 type="button"
                 onClick={() => setActive(c.id)}
-                className={`h-11 rounded-full border px-5 text-sm font-semibold ${
-                  active === c.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white'
+                className={`h-11 shrink-0 rounded-full border px-5 text-sm font-semibold transition-all active:scale-[0.96] ${
+                  active === c.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5]'
                 }`}
               >
                 {c.name}
@@ -129,18 +132,18 @@ export default function Pos() {
             <p className="text-muted">No menu items yet. An admin can add them under Menu.</p>
           )}
 
-          <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
             {visible.map((item) => (
               <button
                 key={item.id}
                 type="button"
                 disabled={!item.can_order}
                 onClick={() => warn(item, add(item))}
-                className={`${card} flex flex-col gap-2 p-4 text-left ${
-                  item.can_order ? 'hover:ring-2 hover:ring-brand' : 'opacity-60'
+                className={`${card} flex flex-col gap-2 p-4 text-left transition-all ${
+                  item.can_order ? 'hover:ring-2 hover:ring-brand active:scale-[0.98]' : 'opacity-60'
                 }`}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   {item.category && (
                     <span className="rounded-xl bg-peach px-3 py-1 text-xs font-bold text-[#b23b06]">
                       {item.category}
@@ -154,7 +157,7 @@ export default function Pos() {
                 </div>
                 <b className="text-base">{item.name}</b>
                 <span className="text-xs text-muted">{item.description}</span>
-                <div className="mt-2 flex items-center justify-between">
+                <div className="mt-auto flex items-center justify-between pt-2">
                   <b className="text-base">{peso(item.price)}</b>
                   <span
                     aria-hidden="true"
@@ -169,20 +172,33 @@ export default function Pos() {
         </section>
 
         <aside
-          className={`${card} sticky top-8 flex h-[calc(100vh-4rem)] flex-col gap-4 overflow-hidden pt-6`}
+          className={`${
+            cartOpen
+              ? 'fixed inset-0 z-40 flex flex-col gap-4 overflow-hidden bg-white pt-6'
+              : 'hidden'
+          } lg:sticky lg:top-8 lg:flex lg:h-[calc(100vh-4rem)] lg:flex-col lg:gap-4 lg:overflow-hidden lg:rounded-[20px] lg:bg-white lg:pt-6 lg:shadow-[0_4px_24px_rgba(20,20,31,0.06)]`}
         >
           <div className="flex items-center justify-between px-6">
             <h2 className="text-lg font-extrabold">Current order</h2>
-            <button
-              type="button"
-              onClick={() => {
-                clear()
-                setNotice('')
-              }}
-              className="text-xs font-bold tracking-wider text-brand-dark"
-            >
-              CLEAR
-            </button>
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => {
+                  clear()
+                  setNotice('')
+                }}
+                className="text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412]"
+              >
+                CLEAR
+              </button>
+              <button
+                type="button"
+                onClick={() => setCartOpen(false)}
+                className="rounded-lg border border-[#d9dee7] px-3 py-1.5 text-xs font-bold text-navy lg:hidden"
+              >
+                CLOSE
+              </button>
+            </div>
           </div>
 
           <div className="flex gap-2 px-6">
@@ -191,8 +207,8 @@ export default function Pos() {
                 key={value}
                 type="button"
                 onClick={() => setOrderType(value)}
-                className={`h-11 flex-1 rounded-full border text-sm font-semibold ${
-                  orderType === value ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white'
+                className={`h-11 flex-1 rounded-full border text-sm font-semibold transition-all active:scale-[0.97] ${
+                  orderType === value ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5]'
                 }`}
               >
                 {label}
@@ -210,8 +226,8 @@ export default function Pos() {
             {lines.length === 0 && <p className="text-muted">The cart is empty.</p>}
             {lines.map((l) => (
               <div key={l.item.id} className="flex items-center gap-3">
-                <div className="flex-1">
-                  <b>{l.item.name}</b>
+                <div className="min-w-0 flex-1">
+                  <b className="block truncate">{l.item.name}</b>
                   <div className="text-muted">{peso(l.item.price)}</div>
                 </div>
                 <div className="flex items-center gap-3 rounded-full bg-navy p-1 text-white">
@@ -219,7 +235,7 @@ export default function Pos() {
                     type="button"
                     aria-label={`Decrease ${l.item.name}`}
                     onClick={() => setQty(l.item.id, l.qty - 1)}
-                    className="h-10 w-10 rounded-full bg-[#32343e]"
+                    className="h-10 w-10 rounded-full bg-[#32343e] transition-colors hover:bg-[#454856] active:scale-95"
                   >
                     −
                   </button>
@@ -228,7 +244,7 @@ export default function Pos() {
                     type="button"
                     aria-label={`Increase ${l.item.name}`}
                     onClick={() => warn(l.item, setQty(l.item.id, l.qty + 1))}
-                    className="h-10 w-10 rounded-full bg-[#32343e]"
+                    className="h-10 w-10 rounded-full bg-[#32343e] transition-colors hover:bg-[#454856] active:scale-95"
                   >
                     +
                   </button>
@@ -249,12 +265,28 @@ export default function Pos() {
                 setPayError('')
                 setShowPayment(true)
               }}
-              className="h-13 rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy disabled:opacity-40"
+              className="h-13 rounded-xl bg-brand text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-40"
             >
               Charge
             </button>
           </div>
         </aside>
+      </div>
+
+      <div className="fixed inset-x-0 bottom-0 z-20 flex items-center justify-between gap-4 border-t border-[#e3e7ee] bg-white px-4 py-3 shadow-[0_-4px_24px_rgba(20,20,31,0.08)] lg:hidden">
+        <div>
+          <div className="text-xs font-semibold text-muted">
+            {itemCount} {itemCount === 1 ? 'item' : 'items'}
+          </div>
+          <b className="text-xl">{peso(total)}</b>
+        </div>
+        <button
+          type="button"
+          onClick={() => setCartOpen(true)}
+          className="h-12 rounded-xl bg-brand px-6 text-sm font-extrabold uppercase tracking-wider text-navy transition-all hover:brightness-110 active:scale-[0.97]"
+        >
+          View order
+        </button>
       </div>
 
       {showPayment && (

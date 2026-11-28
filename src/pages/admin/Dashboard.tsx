@@ -267,20 +267,20 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="flex min-h-full flex-col gap-5 p-8">
-        <header className="flex items-center justify-between">
+      <div className="flex min-h-full flex-col gap-5 p-4 sm:p-6 lg:p-8">
+        <header className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-extrabold">Dashboard</h1>
             <p className="mt-1 text-muted">{ranges.find((r) => r.id === range)?.sub}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {ranges.map((r) => (
               <button
                 key={r.id}
                 type="button"
                 onClick={() => setRange(r.id)}
-                className={`h-11 rounded-full border px-5 text-sm font-semibold ${
-                  range === r.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white'
+                className={`h-11 rounded-full border px-4 text-sm font-semibold transition-all active:scale-[0.96] sm:px-5 ${
+                  range === r.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5]'
                 }`}
               >
                 {r.label}
@@ -289,7 +289,7 @@ export default function Dashboard() {
             <button
               type="button"
               onClick={() => setTick((t) => t + 1)}
-              className="ml-2 text-xs font-bold tracking-wider text-brand-dark"
+              className="ml-auto text-xs font-bold tracking-wider text-brand-dark transition-colors hover:text-[#9a3412] sm:ml-2"
             >
               REFRESH
             </button>
@@ -302,10 +302,10 @@ export default function Dashboard() {
           </p>
         )}
 
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {cards.map((c) => (
-            <div key={c.label} className={`${card} p-5`}>
-              <div className="truncate text-[34px] font-extrabold leading-tight">{c.value}</div>
+            <div key={c.label} className={`${card} p-4 sm:p-5`}>
+              <div className="truncate text-2xl font-extrabold leading-tight sm:text-[34px]">{c.value}</div>
               <div className="mt-2 text-xs font-bold uppercase tracking-widest text-muted">
                 {c.label}
               </div>
@@ -313,7 +313,7 @@ export default function Dashboard() {
           ))}
         </div>
 
-        <div className="grid flex-1 grid-cols-[1.7fr_1fr] gap-5">
+        <div className="grid flex-1 grid-cols-1 gap-5 lg:grid-cols-[1.7fr_1fr]">
           <div className={`${card} flex flex-col p-6`}>
             <div className="text-muted">Total revenue</div>
             <b className="text-2xl">{ready ? peso(stats.sales) : '—'}</b>
