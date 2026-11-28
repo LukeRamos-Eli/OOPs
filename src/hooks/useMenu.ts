@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Category, PosItem } from '../types/database'
 
@@ -6,30 +6,35 @@ export function useMenu() {
   const [categories, setCategories] = useState<Category[]>([])
   const [items, setItems] = useState<PosItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState('')
+  const hasLoadedSuccessfully = useRef(false)
+  const requestId = useRef(0)
 
-  const [tick, setTick] = useState(0)
+  const load = useCallback(async () => {
+    const request = ++requestId.current
+    if (hasLoadedSuccessfully.current) setRefreshing(true)
+    else setLoading(true)
+    setError('')
 
-  const reload = useCallback(() => {
-    setTick((t) => t + 1)
-  }, [])
-
-  useEffect(() => {
-    let cancelled = false
-    Promise.all([
-      supabase.from('categories').select('id, name').order('name'),
-      supabase
-        .from('menu_items')
-        .select('id, category_id, name, description, price, is_available, categories(name)')
-        .order('name'),
-      supabase.from('menu_availability').select('menu_item_id, max_servings, can_order'),
-    ]).then(([c, m, a]) => {
-      if (cancelled) return
+    try {
+      const [c, m, a] = await Promise.all([
+        supabase.from('categories').select('id, name').order('name'),
+        supabase
+          .from('menu_items')
+          .select('id, category_id, name, description, price, is_available, image_path, categories(name)')
+          .order('name'),
+        supabase.from('menu_availability').select('menu_item_id, max_servings, can_order'),
+      ])
+      if (request !== requestId.current) return
 
       const err = c.error ?? m.error ?? a.error
       if (err) {
-        setError(err.message)
-        setLoading(false)
+        setError(
+          hasLoadedSuccessfully.current
+            ? 'Menu availability could not be refreshed.'
+            : 'Menu items could not be loaded. Please try again.'
+        )
         return
       }
 
@@ -48,6 +53,7 @@ export function useMenu() {
             description: row.description,
             price: Number(row.price),
             is_available: row.is_available,
+            image_path: row.image_path ?? null,
             category: cat?.name ?? null,
             max_servings: s?.max_servings ?? null,
             can_order: s?.can_order ?? row.is_available,
@@ -55,12 +61,30 @@ export function useMenu() {
         })
       )
       setError('')
-      setLoading(false)
-    })
-    return () => {
-      cancelled = true
+      hasLoadedSuccessfully.current = true
+    } catch {
+      if (request === requestId.current) {
+        setError(
+          hasLoadedSuccessfully.current
+            ? 'Menu availability could not be refreshed.'
+            : 'Menu items could not be loaded. Please try again.'
+        )
+      }
+    } finally {
+      if (request === requestId.current) {
+        setLoading(false)
+        setRefreshing(false)
+      }
     }
-  }, [tick])
+  }, [])
 
-  return { categories, items, loading, error, reload }
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void load()
+    return () => {
+      requestId.current += 1
+    }
+  }, [load])
+
+  return { categories, items, loading, refreshing, error, reload: load }
 }

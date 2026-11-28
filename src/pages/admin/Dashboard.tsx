@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Layout from '../../components/Layout'
+import RefreshButton from '../../components/RefreshButton'
+import StateMessage from '../../components/StateMessage'
+import { CardSkeleton, LoadingStatus, Skeleton } from '../../components/Skeleton'
 import { supabase } from '../../lib/supabase'
 import { peso } from '../../lib/format'
 
@@ -227,12 +230,39 @@ export default function Dashboard() {
   const [range, setRange] = useState<Range>('today')
   const [tick, setTick] = useState(0)
   const [data, setData] = useState<Data | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
+  const [requestError, setRequestError] = useState('')
 
   useEffect(() => {
     let cancelled = false
-    fetchDashboard(range).then((d) => {
-      if (!cancelled) setData(d)
-    })
+    fetchDashboard(range)
+      .then((d) => {
+        if (!cancelled) {
+          if (d.error) {
+            setRequestError('Dashboard data could not be refreshed. Showing previous data when available.')
+            setData((current) => current?.range === range ? current : d)
+          } else {
+            setRequestError('')
+            setData(d)
+          }
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setRequestError('Dashboard data could not be refreshed. Showing previous data when available.')
+          setData((current) => current?.range === range ? current : {
+              range,
+              orders: [],
+              items: [],
+              low: [],
+              buckets: [],
+              error: 'Dashboard data could not be loaded.',
+            })
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setRefreshing(false)
+      })
     return () => {
       cancelled = true
     }
@@ -259,10 +289,10 @@ export default function Dashboard() {
 
   const low = data?.low ?? []
   const cards = [
-    { label: 'Total sales', value: ready ? peso(stats.sales) : '—' },
-    { label: 'Transactions', value: ready ? String(stats.count) : '—' },
-    { label: 'Best seller', value: ready ? (stats.best[0]?.[0] ?? '—') : '—' },
-    { label: 'Low-stock items', value: ready ? String(low.length) : '—' },
+    { label: 'Total sales', value: ready && !data?.error ? peso(stats.sales) : '—' },
+    { label: 'Transactions', value: ready && !data?.error ? String(stats.count) : '—' },
+    { label: 'Best seller', value: ready && !data?.error ? (stats.best[0]?.[0] ?? '—') : '—' },
+    { label: 'Low-stock items', value: ready && !data?.error ? String(low.length) : '—' },
   ]
 
   return (
@@ -278,6 +308,7 @@ export default function Dashboard() {
               <button
                 key={r.id}
                 type="button"
+<<<<<<< HEAD
                 onClick={() => setRange(r.id)}
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -291,11 +322,21 @@ export default function Dashboard() {
                 className={`h-11 rounded-full border px-5 text-sm font-semibold transition-all active:scale-[0.95] ${
                   range === r.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white hover:bg-[#f0f2f5] active:bg-[#e3e7ee]'
 >>>>>>> parent of b9fe2de (Merge branch 'main' into Villarias)
+=======
+                onClick={() => {
+                  setRefreshing(false)
+                  setRequestError('')
+                  setRange(r.id)
+                }}
+                className={`h-11 rounded-full border px-5 text-sm font-semibold ${
+                  range === r.id ? 'border-brand bg-brand text-navy' : 'border-[#d9dee7] bg-white'
+>>>>>>> origin/main
                 }`}
               >
                 {r.label}
               </button>
             ))}
+<<<<<<< HEAD
             <button
               type="button"
               onClick={() => setTick((t) => t + 1)}
@@ -311,19 +352,41 @@ export default function Dashboard() {
             >
               REFRESH
             </button>
+=======
+            <RefreshButton
+              refreshing={refreshing}
+              onClick={() => {
+                setRequestError('')
+                if (data?.error) setData(null)
+                setRefreshing(true)
+                setTick((t) => t + 1)
+              }}
+              className="ml-2"
+            />
+>>>>>>> origin/main
           </div>
         </header>
 
-        {data?.error && (
+        {ready && (requestError || data?.error) && (
           <p role="alert" className="text-sm text-red-700">
-            {data.error}
+            {requestError || 'Dashboard data could not be loaded. Please refresh and try again.'}
           </p>
         )}
+        {!ready && <LoadingStatus label="Loading dashboard data…" />}
 
+<<<<<<< HEAD
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
           {cards.map((c) => (
             <div key={c.label} className={`${card} p-4 sm:p-5`}>
               <div className="truncate text-2xl font-extrabold leading-tight sm:text-[34px]">{c.value}</div>
+=======
+        <div className="grid grid-cols-4 gap-4">
+          {!ready
+            ? cards.map((c) => <CardSkeleton key={c.label} />)
+            : cards.map((c) => (
+            <div key={c.label} className={`${card} content-enter p-5`}>
+              <div className="truncate text-[34px] font-extrabold leading-tight">{c.value}</div>
+>>>>>>> origin/main
               <div className="mt-2 text-xs font-bold uppercase tracking-widest text-muted">
                 {c.label}
               </div>
@@ -335,16 +398,36 @@ export default function Dashboard() {
           <div className={`${card} flex flex-col p-6`}>
             <div className="text-muted">Total revenue</div>
             <b className="text-2xl">{ready ? peso(stats.sales) : '—'}</b>
-            {ready && data ? <Chart key={range} buckets={data.buckets} /> : <p className="mt-6 text-muted">Loading…</p>}
+            {!ready ? (
+              <div className="mt-6 space-y-4">
+                <Skeleton className="h-52 w-full" />
+                <Skeleton className="h-3 w-full" />
+              </div>
+            ) : data?.error ? (
+              <StateMessage variant="error" title="Revenue is unavailable" description="Refresh the dashboard to try again." />
+            ) : data ? (
+              <div className="content-enter">
+                {data.buckets.length === 0
+                  ? <StateMessage title="No sales yet" description="Sales will appear here once an order is completed." />
+                  : <Chart key={range} buckets={data.buckets} />}
+              </div>
+            ) : null}
           </div>
 
           <div className="flex flex-col gap-5">
             <div className={`${card} p-6`}>
               <b className="text-base">Best sellers</b>
-              {ready && stats.best.length === 0 && (
+              {!ready ? (
+                <div className="mt-5 space-y-4">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-5 w-2/3" />
+                  <Skeleton className="h-5 w-1/2" />
+                </div>
+              ) : data?.error ? (
+                <p className="mt-4 text-muted">Best sellers could not be loaded.</p>
+              ) : stats.best.length === 0 ? (
                 <p className="mt-4 text-muted">No sales in this period yet.</p>
-              )}
-              {stats.best.map(([name, s]) => (
+              ) : stats.best.map(([name, s]) => (
                 <div key={name} className="mt-5 flex items-center gap-3">
                   <div className="flex-1">
                     <b>{name}</b>
@@ -368,10 +451,17 @@ export default function Dashboard() {
                   VIEW ALL
                 </Link>
               </div>
-              {ready && low.length === 0 && (
+              {!ready ? (
+                <div className="mt-5 space-y-4">
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-5 w-2/3" />
+                  <Skeleton className="h-5 w-1/2" />
+                </div>
+              ) : data?.error ? (
+                <p className="mt-4 text-muted">Stock information could not be loaded.</p>
+              ) : low.length === 0 ? (
                 <p className="mt-4 text-muted">Everything is above its minimum.</p>
-              )}
-              {low.slice(0, 5).map((r) => (
+              ) : low.slice(0, 5).map((r) => (
                 <div key={r.id} className="mt-4 flex items-center justify-between gap-3">
                   <b>{r.name}</b>
                   <span className="rounded-xl bg-peach px-3 py-1 text-xs font-bold text-[#b23b06]">

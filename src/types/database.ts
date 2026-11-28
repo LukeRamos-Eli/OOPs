@@ -7,6 +7,7 @@ export type MenuItem = {
   description: string | null
   price: number
   is_available: boolean
+  image_path: string | null
 }
 
 // A menu item as the POS sees it: with its category and what the stock allows

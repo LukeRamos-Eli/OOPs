@@ -13,9 +13,9 @@ export default function Receipt({
       role="dialog"
       aria-modal="true"
       aria-label="Receipt"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4"
+      className="modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-navy/60 p-4"
     >
-      <div className="w-full max-w-sm rounded-3xl bg-white p-6 font-mono text-sm">
+      <div className="modal-panel w-full max-w-sm rounded-3xl bg-white p-6 font-mono text-sm">
         <div className="mb-3 text-center">
           <div className="text-lg font-bold">KaPOS</div>
           <div>Official Receipt</div>

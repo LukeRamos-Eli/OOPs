@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import Layout from '../../components/Layout'
+import StateMessage from '../../components/StateMessage'
+import { LoadingStatus, TableSkeleton } from '../../components/Skeleton'
 import { supabase } from '../../lib/supabase'
 import type { Ingredient } from '../../types/database'
 
@@ -19,23 +21,39 @@ export default function Inventory() {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [error, setError] = useState('')
+  const [notice, setNotice] = useState('')
   const [busy, setBusy] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+  const hasLoadedSuccessfully = useRef(false)
 
   const load = useCallback(async () => {
-    const { data, error } = await supabase.from('ingredients').select('*').order('name')
-    if (error) {
-      setError(error.message)
-      return
+    if (hasLoadedSuccessfully.current) setRefreshing(true)
+    else setLoading(true)
+    setError('')
+    try {
+      const { data, error } = await supabase.from('ingredients').select('*').order('name')
+      if (error) throw error
+      setRows(
+        (data ?? []).map((r) => ({
+          id: r.id,
+          name: r.name,
+          unit: r.unit,
+          stock_qty: Number(r.stock_qty),
+          min_stock: Number(r.min_stock),
+        }))
+      )
+      hasLoadedSuccessfully.current = true
+    } catch {
+      setError(
+        hasLoadedSuccessfully.current
+          ? 'Inventory could not be refreshed. Showing previously loaded items.'
+          : 'Inventory could not be loaded. Please try again.'
+      )
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
     }
-    setRows(
-      (data ?? []).map((r) => ({
-        id: r.id,
-        name: r.name,
-        unit: r.unit,
-        stock_qty: Number(r.stock_qty),
-        min_stock: Number(r.min_stock),
-      }))
-    )
   }, [])
 
   useEffect(() => {
@@ -59,6 +77,8 @@ export default function Inventory() {
 
   async function save() {
     setError('')
+    setNotice('')
+    const wasEditing = editingId !== null
     const name = form.name.trim()
     const stock = Number(form.stock)
     const min = Number(form.min)
@@ -79,11 +99,15 @@ export default function Inventory() {
       return
     }
     setShowForm(false)
+    setEditingId(null)
     await load()
+    setNotice(wasEditing ? 'Ingredient updated.' : 'Ingredient added.')
   }
 
   async function remove(r: Ingredient) {
     if (!window.confirm(`Delete "${r.name}"?`)) return
+    setError('')
+    setNotice('')
     const { error } = await supabase.from('ingredients').delete().eq('id', r.id)
     if (error) {
       setError(
@@ -94,6 +118,7 @@ export default function Inventory() {
       return
     }
     await load()
+    setNotice(`${r.name} deleted.`)
   }
 
   const low = rows.filter((r) => r.stock_qty <= r.min_stock)
@@ -126,6 +151,7 @@ export default function Inventory() {
             + Add ingredient
           </button>
         </header>
+        {notice && <p role="status" className="content-enter text-sm text-[#17663a]">{notice}</p>}
 
         {showForm && (
           <div className={`${card} flex flex-col gap-4 p-4 sm:p-6`}>
@@ -242,12 +268,51 @@ export default function Inventory() {
           ))}
         </div>
 
+<<<<<<< HEAD
         <div className={`${card} p-4 sm:p-6`}>
           {visible.length === 0 ? (
             <p className="text-muted">Nothing to show here yet.</p>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[540px] border-collapse text-left">
+=======
+        <div className={`${card} p-6`}>
+          {refreshing && <LoadingStatus label="Refreshing inventory…" className="mb-4" />}
+          {loading ? (
+            <div className="overflow-x-auto">
+              <div className="min-w-[600px]">
+                <TableSkeleton
+                  label="Loading inventory…"
+                  rows={5}
+                  columns={5}
+                  columnWidths={['1.8fr', '1fr', '1fr', '0.9fr', '0.7fr']}
+                />
+              </div>
+            </div>
+          ) : error && rows.length === 0 ? (
+            <StateMessage
+              variant="error"
+              title="Inventory unavailable"
+              description="We couldn't retrieve inventory. Please try again."
+              action={
+                <button type="button" onClick={load} className="text-sm font-bold text-brand-dark">
+                  Try again
+                </button>
+              }
+            />
+          ) : visible.length === 0 ? (
+            <StateMessage
+              title={rows.length === 0 ? 'No ingredients yet' : 'No ingredients in this filter'}
+              description={
+                rows.length === 0
+                  ? 'Add an ingredient to start tracking stock.'
+                  : 'Choose another stock filter to see more ingredients.'
+              }
+            />
+          ) : (
+            <div className="content-enter overflow-x-auto">
+            <table className="w-full min-w-[600px] border-collapse text-left">
+>>>>>>> origin/main
               <thead>
                 <tr className="text-muted">
                   {['Ingredient', 'In stock', 'Minimum', 'Status', ''].map((h) => (
@@ -301,7 +366,11 @@ export default function Inventory() {
                   )
                 })}
               </tbody>
+<<<<<<< HEAD
               </table>
+=======
+            </table>
+>>>>>>> origin/main
             </div>
           )}
         </div>
